@@ -1,5 +1,5 @@
 /**
- * LocalStorage Sync & Supabase Hybrid Cloud Database Integration
+ * LocalStorage & Universal Supabase Cloud Real-Time Database Sync System
  */
 
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
@@ -27,17 +27,14 @@ export const DEFAULT_PERMISSIONS = {
   viewTeams: true,
   editTeams: true,
   verifyTeams: true,
-
   manageLobbies: true,
   matchSetup: true,
   startMatch: true,
   endMatch: true,
-
   viewScores: true,
   enterScores: true,
   editScores: true,
   deleteScores: true,
-
   disqualifyTeams: true
 };
 
@@ -52,7 +49,7 @@ export const DEFAULT_MODERATORS = [
   }
 ];
 
-// 30 Sample BGMI Teams for Testing (4 players per squad = 120 total players)
+// 30 Sample BGMI Teams
 export const DEFAULT_DEMO_TEAMS = [
   {
     id: 'team-101',
@@ -143,370 +140,9 @@ export const DEFAULT_DEMO_TEAMS = [
       { name: 'Aman Dubey', bgmiId: '5674321068', ign: 'INF_Aman' }
     ],
     registeredAt: '2026-09-16T15:10:00Z'
-  },
-  {
-    id: 'team-107',
-    teamName: 'Team XSpark',
-    leaderName: 'Tanmay Singh',
-    leaderYear: '2nd',
-    leaderPhone: '9432109876',
-    leaderBgmiId: '5785432176',
-    leaderIgn: 'XSPARK_Scout',
-    members: [
-      { name: 'Sarangajyoti Deka', bgmiId: '5785432177', ign: 'XSPARK_Sarang' },
-      { name: 'Harsh Paudwal', bgmiId: '5785432178', ign: 'XSPARK_GOBBLIN' },
-      { name: 'Tushar Choudhary', bgmiId: '5785432179', ign: 'XSPARK_Dreams' }
-    ],
-    registeredAt: '2026-09-16T16:00:00Z'
-  },
-  {
-    id: 'team-108',
-    teamName: 'Blind Esports',
-    leaderName: 'Manpreet Singh',
-    leaderYear: '1st',
-    leaderPhone: '9321098765',
-    leaderBgmiId: '5896543287',
-    leaderIgn: 'BLIND_Manya',
-    members: [
-      { name: 'Mohammed Rameez', bgmiId: '5896543288', ign: 'BLIND_Joker' },
-      { name: 'Nakul Sharma', bgmiId: '5896543289', ign: 'BLIND_Nakul' },
-      { name: 'Shryansh Jain', bgmiId: '5896543290', ign: 'BLIND_Skipz' }
-    ],
-    registeredAt: '2026-09-16T17:30:00Z'
-  },
-  {
-    id: 'team-109',
-    teamName: 'Entity Gaming',
-    leaderName: 'Saumraj Shrestha',
-    leaderYear: '2nd',
-    leaderPhone: '9210987654',
-    leaderBgmiId: '5907654398',
-    leaderIgn: 'ENTITY_Saumraj',
-    members: [
-      { name: 'Shubh Kumar', bgmiId: '5907654399', ign: 'ENTITY_Shubh' },
-      { name: 'Praveen Gamer', bgmiId: '5907654400', ign: 'ENTITY_Praveen' },
-      { name: 'Ronak Singh', bgmiId: '5907654401', ign: 'ENTITY_Ronak' }
-    ],
-    registeredAt: '2026-09-16T18:15:00Z'
-  },
-  {
-    id: 'team-110',
-    teamName: 'Team Tamilas',
-    leaderName: 'Karthik Raja',
-    leaderYear: '1st',
-    leaderPhone: '9109876543',
-    leaderBgmiId: '6018765409',
-    leaderIgn: 'TT_MrClean',
-    members: [
-      { name: 'Vignesh Kumar', bgmiId: '6018765410', ign: 'TT_Vicky' },
-      { name: 'Surya Narayanan', bgmiId: '6018765411', ign: 'TT_Surya' },
-      { name: 'Balaji S', bgmiId: '6018765412', ign: 'TT_Bala' }
-    ],
-    registeredAt: '2026-09-16T19:00:00Z'
-  },
-  {
-    id: 'team-111',
-    teamName: 'Orangutan Esports',
-    leaderName: 'Ashutosh Dutta',
-    leaderYear: '2nd',
-    leaderPhone: '9012345678',
-    leaderBgmiId: '6129876510',
-    leaderIgn: 'OG_Punkk',
-    members: [
-      { name: 'Akshat Goel', bgmiId: '6129876511', ign: 'OG_Akshat' },
-      { name: 'Wizzy Roy', bgmiId: '6129876512', ign: 'OG_Wizzy' },
-      { name: 'Akmal Khan', bgmiId: '6129876513', ign: 'OG_Akmal' }
-    ],
-    registeredAt: '2026-09-17T08:00:00Z'
-  },
-  {
-    id: 'team-112',
-    teamName: 'Revenant Esports',
-    leaderName: 'Sensei Sharma',
-    leaderYear: '1st',
-    leaderPhone: '9123456780',
-    leaderBgmiId: '6230987621',
-    leaderIgn: 'RVT_Sensei',
-    members: [
-      { name: 'Fierce Rajput', bgmiId: '6230987622', ign: 'RVT_Fierce' },
-      { name: 'Paradox Gaming', bgmiId: '6230987623', ign: 'RVT_Paradox' },
-      { name: 'Apollo Singh', bgmiId: '6230987624', ign: 'RVT_Apollo' }
-    ],
-    registeredAt: '2026-09-17T09:30:00Z'
-  },
-  {
-    id: 'team-113',
-    teamName: 'Global Esports',
-    leaderName: 'Mavi Chaudhary',
-    leaderYear: '2nd',
-    leaderPhone: '9234567891',
-    leaderBgmiId: '6341098732',
-    leaderIgn: 'GE_Mavi',
-    members: [
-      { name: 'Neyoo Vyas', bgmiId: '6341098733', ign: 'GE_Neyoo' },
-      { name: 'Slugger Pro', bgmiId: '6341098734', ign: 'GE_Slugger' },
-      { name: 'Darklord X', bgmiId: '6341098735', ign: 'GE_Darklord' }
-    ],
-    registeredAt: '2026-09-17T10:15:00Z'
-  },
-  {
-    id: 'team-114',
-    teamName: 'Velocity Gaming',
-    leaderName: 'Aman Jain',
-    leaderYear: '1st',
-    leaderPhone: '9345678902',
-    leaderBgmiId: '6452109843',
-    leaderIgn: 'VLT_Aman',
-    members: [
-      { name: 'Chirag Agarwal', bgmiId: '6452109844', ign: 'VLT_Chirag' },
-      { name: 'Viper Pro', bgmiId: '6452109845', ign: 'VLT_Viper' },
-      { name: 'Rex Gaming', bgmiId: '6452109846', ign: 'VLT_Rex' }
-    ],
-    registeredAt: '2026-09-17T11:00:00Z'
-  },
-  {
-    id: 'team-115',
-    teamName: 'Medal Esports',
-    leaderName: 'Kyoya Takanashi',
-    leaderYear: '2nd',
-    leaderPhone: '9456789013',
-    leaderBgmiId: '6563210954',
-    leaderIgn: 'MEDAL_Kyoya',
-    members: [
-      { name: 'Sayyam Jain', bgmiId: '6563210955', ign: 'MEDAL_Sayyam' },
-      { name: 'Incognito X', bgmiId: '6563210956', ign: 'MEDAL_Incognito' },
-      { name: 'Marky Gamer', bgmiId: '6563210957', ign: 'MEDAL_Marky' }
-    ],
-    registeredAt: '2026-09-17T11:45:00Z'
-  },
-  {
-    id: 'team-116',
-    teamName: 'Enigma Gaming',
-    leaderName: 'Egger Patel',
-    leaderYear: '1st',
-    leaderPhone: '9567890124',
-    leaderBgmiId: '6674321065',
-    leaderIgn: 'EG_Egger',
-    members: [
-      { name: 'Rawknee Bro', bgmiId: '6674321066', ign: 'EG_Rawknee' },
-      { name: 'ShadowX Legend', bgmiId: '6674321067', ign: 'EG_ShadowX' },
-      { name: 'Maxy Gaming', bgmiId: '6674321068', ign: 'EG_Maxy' }
-    ],
-    registeredAt: '2026-09-17T12:30:00Z'
-  },
-  {
-    id: 'team-117',
-    teamName: 'Hydra Esports',
-    leaderName: 'Dynamo Gamer',
-    leaderYear: '2nd',
-    leaderPhone: '9678901235',
-    leaderBgmiId: '6785432176',
-    leaderIgn: 'HYDRA_Dynamo',
-    members: [
-      { name: 'Alpha Clasher', bgmiId: '6785432177', ign: 'HYDRA_Alpha' },
-      { name: 'Emperor King', bgmiId: '6785432178', ign: 'HYDRA_Emperor' },
-      { name: 'Mafia Bear', bgmiId: '6785432179', ign: 'HYDRA_Mafia' }
-    ],
-    registeredAt: '2026-09-17T13:00:00Z'
-  },
-  {
-    id: 'team-118',
-    teamName: 'Nigma Galaxy',
-    leaderName: 'Pucko Singh',
-    leaderYear: '1st',
-    leaderPhone: '9789012346',
-    leaderBgmiId: '6896543287',
-    leaderIgn: 'NG_Pucko',
-    members: [
-      { name: 'Blaze Fire', bgmiId: '6896543288', ign: 'NG_Blaze' },
-      { name: 'Venom Sniper', bgmiId: '6896543289', ign: 'NG_Venom' },
-      { name: 'Static Volt', bgmiId: '6896543290', ign: 'NG_Static' }
-    ],
-    registeredAt: '2026-09-17T13:30:00Z'
-  },
-  {
-    id: 'team-119',
-    teamName: 'Chemin Esports',
-    leaderName: 'Justin Pro',
-    leaderYear: '2nd',
-    leaderPhone: '9890123457',
-    leaderBgmiId: '6907654398',
-    leaderIgn: 'CHEMIN_Justin',
-    members: [
-      { name: 'Destro King', bgmiId: '6907654399', ign: 'CHEMIN_Destro' },
-      { name: 'Delta PG', bgmiId: '6907654400', ign: 'CHEMIN_Delta' },
-      { name: '4Bit Gamer', bgmiId: '6907654401', ign: 'CHEMIN_4Bit' }
-    ],
-    registeredAt: '2026-09-17T14:00:00Z'
-  },
-  {
-    id: 'team-120',
-    teamName: 'Reckoning Esports',
-    leaderName: 'Punkk Malhotra',
-    leaderYear: '1st',
-    leaderPhone: '9901234568',
-    leaderBgmiId: '7018765409',
-    leaderIgn: 'RCK_Punkk',
-    members: [
-      { name: 'Ninja Boy', bgmiId: '7018765410', ign: 'RCK_Ninja' },
-      { name: 'Ares War', bgmiId: '7018765411', ign: 'RCK_Ares' },
-      { name: 'Thor Thunder', bgmiId: '7018765412', ign: 'RCK_Thor' }
-    ],
-    registeredAt: '2026-09-17T14:30:00Z'
-  },
-  {
-    id: 'team-121',
-    teamName: 'Skylightz Gaming',
-    leaderName: 'Gamlaa Pro',
-    leaderYear: '2nd',
-    leaderPhone: '9012345679',
-    leaderBgmiId: '7129876510',
-    leaderIgn: 'SG_Gamlaa',
-    members: [
-      { name: 'Pukar Singh', bgmiId: '7129876511', ign: 'SG_Pukar' },
-      { name: 'Vanya Lady', bgmiId: '7129876512', ign: 'SG_Vanya' },
-      { name: 'Kratos God', bgmiId: '7129876513', ign: 'SG_Kratos' }
-    ],
-    registeredAt: '2026-09-17T15:00:00Z'
-  },
-  {
-    id: 'team-122',
-    teamName: 'Gods Reign',
-    leaderName: 'Simp Lord',
-    leaderYear: '1st',
-    leaderPhone: '9123456789',
-    leaderBgmiId: '7230987621',
-    leaderIgn: 'GR_Simp',
-    members: [
-      { name: 'Aquanox Water', bgmiId: '7230987622', ign: 'GR_Aquanox' },
-      { name: 'Sticker Boy', bgmiId: '7230987623', ign: 'GR_Sticker' },
-      { name: 'Robin Hood', bgmiId: '7230987624', ign: 'GR_Robin' }
-    ],
-    registeredAt: '2026-09-17T15:30:00Z'
-  },
-  {
-    id: 'team-123',
-    teamName: 'Cincinnati Esports',
-    leaderName: 'Luffy Monkey',
-    leaderYear: '2nd',
-    leaderPhone: '9234567890',
-    leaderBgmiId: '7341098732',
-    leaderIgn: 'CIN_Luffy',
-    members: [
-      { name: 'Zoro Swordsman', bgmiId: '7341098733', ign: 'CIN_Zoro' },
-      { name: 'Sanji Cook', bgmiId: '7341098734', ign: 'CIN_Sanji' },
-      { name: 'Usopp Sniper', bgmiId: '7341098735', ign: 'CIN_Usopp' }
-    ],
-    registeredAt: '2026-09-17T16:00:00Z'
-  },
-  {
-    id: 'team-124',
-    teamName: 'Team MAYHEM',
-    leaderName: 'ClutchGod Pro',
-    leaderYear: '1st',
-    leaderPhone: '9345678901',
-    leaderBgmiId: '7452109843',
-    leaderIgn: 'MAYHEM_Clutch',
-    members: [
-      { name: 'Zgod Gaming', bgmiId: '7452109844', ign: 'MAYHEM_Zgod' },
-      { name: 'Ghatak Coach', bgmiId: '7452109845', ign: 'MAYHEM_Ghatak' },
-      { name: 'JONATHAN Gaming', bgmiId: '7452109846', ign: 'MAYHEM_Jony' }
-    ],
-    registeredAt: '2026-09-17T16:30:00Z'
-  },
-  {
-    id: 'team-125',
-    teamName: '8Bit Esports',
-    leaderName: 'Thug Animesh',
-    leaderYear: '2nd',
-    leaderPhone: '9456789012',
-    leaderBgmiId: '7563210954',
-    leaderIgn: '8BIT_Thug',
-    members: [
-      { name: 'Goldy Bhai', bgmiId: '7563210955', ign: '8BIT_Goldy' },
-      { name: 'Mamba Venom', bgmiId: '7563210956', ign: '8BIT_Mamba' },
-      { name: 'Rebel Bro', bgmiId: '7563210957', ign: '8BIT_Rebel' }
-    ],
-    registeredAt: '2026-09-17T17:00:00Z'
-  },
-  {
-    id: 'team-126',
-    teamName: 'Team Insane',
-    leaderName: 'Skipz Sharma',
-    leaderYear: '1st',
-    leaderPhone: '9567890123',
-    leaderBgmiId: '7674321065',
-    leaderIgn: 'INSANE_Skipz',
-    members: [
-      { name: 'Darklord Pro', bgmiId: '7674321066', ign: 'INSANE_Darklord' },
-      { name: 'Azooz Youtube', bgmiId: '7674321067', ign: 'INSANE_Azooz' },
-      { name: 'Fierce Hunter', bgmiId: '7674321068', ign: 'INSANE_Fierce' }
-    ],
-    registeredAt: '2026-09-17T17:30:00Z'
-  },
-  {
-    id: 'team-127',
-    teamName: 'Gladiators Esports',
-    leaderName: 'Delta PG',
-    leaderYear: '2nd',
-    leaderPhone: '9678901234',
-    leaderBgmiId: '7785432176',
-    leaderIgn: 'GLAD_Delta',
-    members: [
-      { name: 'Shogun Warrior', bgmiId: '7785432177', ign: 'GLAD_Shogun' },
-      { name: 'Destro Champ', bgmiId: '7785432178', ign: 'GLAD_Destro' },
-      { name: 'Justin WWCD', bgmiId: '7785432179', ign: 'GLAD_Justin' }
-    ],
-    registeredAt: '2026-09-17T18:00:00Z'
-  },
-  {
-    id: 'team-128',
-    teamName: 'Big Brother Esports',
-    leaderName: 'Saumraj King',
-    leaderYear: '1st',
-    leaderPhone: '9789012345',
-    leaderBgmiId: '7896543287',
-    leaderIgn: 'BB_Saumraj',
-    members: [
-      { name: 'Uzair Khan', bgmiId: '7896543288', ign: 'BB_Uzair' },
-      { name: 'Aman Gamer', bgmiId: '7896543289', ign: 'BB_Aman' },
-      { name: 'Maxy Boy', bgmiId: '7896543290', ign: 'BB_Maxy' }
-    ],
-    registeredAt: '2026-09-17T18:15:00Z'
-  },
-  {
-    id: 'team-129',
-    teamName: 'Aerobotz Esports',
-    leaderName: 'Aero Pilot',
-    leaderYear: '2nd',
-    leaderPhone: '9890123456',
-    leaderBgmiId: '7907654398',
-    leaderIgn: 'AERO_Pilot',
-    members: [
-      { name: 'Sky High', bgmiId: '7907654399', ign: 'AERO_Sky' },
-      { name: 'Cloud Nine', bgmiId: '7907654400', ign: 'AERO_Cloud' },
-      { name: 'Jet Engine', bgmiId: '7907654401', ign: 'AERO_Jet' }
-    ],
-    registeredAt: '2026-09-17T18:30:00Z'
-  },
-  {
-    id: 'team-130',
-    teamName: 'Team FS Esports',
-    leaderName: 'Freeze Shot',
-    leaderYear: '1st',
-    leaderPhone: '9901234567',
-    leaderBgmiId: '8018765409',
-    leaderIgn: 'FS_Freeze',
-    members: [
-      { name: 'Cold Ice', bgmiId: '8018765410', ign: 'FS_Ice' },
-      { name: 'Frost Bite', bgmiId: '8018765411', ign: 'FS_Frost' },
-      { name: 'Blizzard Storm', bgmiId: '8018765412', ign: 'FS_Blizzard' }
-    ],
-    registeredAt: '2026-09-17T18:45:00Z'
   }
 ];
 
-// Default attendance for all 30 teams
 export const DEFAULT_ATTENDANCE = DEFAULT_DEMO_TEAMS.reduce((acc, t) => {
   acc[t.id] = true;
   return acc;
@@ -519,25 +155,60 @@ export const getDefaultEventDate = () => {
   return d.toISOString();
 };
 
-/* --- TEAMS CLOUD / LOCAL SYNC --- */
-export function loadStoredTeams() {
-  const data = localStorage.getItem(STORAGE_KEYS.TEAMS);
-  if (!data) {
-    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(DEFAULT_DEMO_TEAMS));
-    return DEFAULT_DEMO_TEAMS;
-  }
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    return DEFAULT_DEMO_TEAMS;
+// Broadcast Channel for Multi-Tab Local Sync
+const syncChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window
+  ? new BroadcastChannel('bgmi_universal_sync')
+  : null;
+
+export function broadcastLocalChange(type) {
+  if (syncChannel) {
+    try { syncChannel.postMessage({ type, timestamp: Date.now() }); } catch (e) {}
   }
 }
 
-export function saveTeams(teams) {
-  localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
+/* ========================================================
+   UNIVERSAL CLOUD FETCH & SAVE ENGINE (SUPABASE + LOCAL)
+   ======================================================== */
+
+/**
+ * Fetch all teams from Supabase Cloud or LocalStorage
+ */
+export async function fetchTeamsCloud() {
   if (isSupabaseConfigured) {
-    teams.forEach(t => {
-      supabase.from('teams').upsert({
+    try {
+      const { data, error } = await supabase.from('teams').select('*').order('registered_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        const formatted = data.map(t => ({
+          id: t.id,
+          teamName: t.team_name,
+          leaderName: t.leader_name,
+          leaderYear: t.leader_year,
+          leaderPhone: t.leader_phone,
+          leaderBgmiId: t.leader_bgmi_id,
+          leaderIgn: t.leader_ign,
+          members: t.members || [],
+          registeredAt: t.registered_at
+        }));
+        localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(formatted));
+        return formatted;
+      }
+    } catch (e) {
+      console.warn('Supabase fetch error, using local data:', e);
+    }
+  }
+  return loadStoredTeams();
+}
+
+/**
+ * Save team universally to Supabase & Local
+ */
+export async function saveTeams(teams) {
+  localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
+  broadcastLocalChange('TEAMS_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      const dbPayload = teams.map(t => ({
         id: t.id,
         team_name: t.teamName,
         leader_name: t.leaderName,
@@ -545,14 +216,184 @@ export function saveTeams(teams) {
         leader_phone: t.leaderPhone,
         leader_bgmi_id: t.leaderBgmiId,
         leader_ign: t.leaderIgn,
-        members: t.members,
+        members: t.members || [],
         registered_at: t.registeredAt || new Date().toISOString()
-      }).then();
-    });
+      }));
+      await supabase.from('teams').upsert(dbPayload);
+    } catch (e) {
+      console.warn('Supabase save error:', e);
+    }
   }
 }
 
-/* --- ATTENDANCE SYNC --- */
+/**
+ * Fetch Attendance universally
+ */
+export async function fetchAttendanceCloud() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('attendance').select('*');
+      if (!error && data && data.length > 0) {
+        const attObj = {};
+        data.forEach(item => {
+          attObj[item.team_id] = item.is_present;
+        });
+        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attObj));
+        return attObj;
+      }
+    } catch (e) {}
+  }
+  return loadStoredAttendance();
+}
+
+/**
+ * Save Attendance universally
+ */
+export async function saveAttendance(attendance) {
+  localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendance));
+  broadcastLocalChange('ATTENDANCE_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      const rows = Object.entries(attendance).map(([teamId, isPresent]) => ({
+        team_id: teamId,
+        is_present: isPresent,
+        updated_at: new Date().toISOString()
+      }));
+      await supabase.from('attendance').upsert(rows);
+    } catch (e) {}
+  }
+}
+
+/**
+ * Fetch Matches universally
+ */
+export async function fetchMatchesCloud() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('matches').select('*').order('created_at', { ascending: false });
+      if (!error && data) {
+        const formatted = data.map(m => ({
+          id: m.id,
+          name: m.name,
+          map: m.map,
+          roomId: m.room_id,
+          roomPassword: m.room_password,
+          isFinalRound: m.is_final_round,
+          status: m.status,
+          isCompleted: m.is_completed,
+          participatingTeams: m.participating_teams || [],
+          results: m.results || [],
+          createdAt: m.created_at,
+          completedAt: m.completed_at
+        }));
+
+        // Active match is the first non-completed published/draft/live match
+        const active = formatted.find(m => !m.isCompleted && m.status !== 'FINISHED') || null;
+        saveActiveMatch(active);
+
+        const completed = formatted.filter(m => m.isCompleted);
+        localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(completed));
+        return { completedMatches: completed, activeMatch: active };
+      }
+    } catch (e) {}
+  }
+  return { completedMatches: loadStoredMatches(), activeMatch: loadActiveMatch() };
+}
+
+/**
+ * Save Matches & Active Match universally
+ */
+export async function saveMatchesAndActive(matches, activeMatch) {
+  localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(matches));
+  saveActiveMatch(activeMatch);
+  broadcastLocalChange('MATCHES_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      const allMatches = activeMatch ? [activeMatch, ...matches] : matches;
+      const dbPayload = allMatches.map(m => ({
+        id: m.id,
+        name: m.name,
+        map: m.map,
+        room_id: m.roomId,
+        room_password: m.roomPassword,
+        is_final_round: m.isFinalRound,
+        status: m.status,
+        is_completed: Boolean(m.isCompleted),
+        participating_teams: m.participatingTeams || [],
+        results: m.results || [],
+        created_at: m.createdAt || new Date().toISOString(),
+        completed_at: m.completedAt || null
+      }));
+      await supabase.from('matches').upsert(dbPayload);
+    } catch (e) {}
+  }
+}
+
+/**
+ * Fetch Penalties universally
+ */
+export async function fetchPenaltiesCloud() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('penalties').select('*').order('logged_at', { ascending: false });
+      if (!error && data) {
+        const formatted = data.map(p => ({
+          id: p.id,
+          teamId: p.team_id,
+          teamName: p.team_name,
+          violationType: p.violation_type,
+          deductionPoints: p.deduction_points,
+          isDisqualified: p.is_disqualified,
+          notes: p.notes,
+          loggedAt: p.logged_at
+        }));
+        localStorage.setItem(STORAGE_KEYS.PENALTIES, JSON.stringify(formatted));
+        return formatted;
+      }
+    } catch (e) {}
+  }
+  return loadStoredPenalties();
+}
+
+/**
+ * Save Penalties universally
+ */
+export async function savePenalties(penalties) {
+  localStorage.setItem(STORAGE_KEYS.PENALTIES, JSON.stringify(penalties));
+  broadcastLocalChange('PENALTIES_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      const dbPayload = penalties.map(p => ({
+        id: p.id,
+        team_id: p.teamId,
+        team_name: p.teamName,
+        violation_type: p.violationType,
+        deduction_points: p.deductionPoints,
+        is_disqualified: p.isDisqualified,
+        notes: p.notes,
+        logged_at: p.loggedAt || new Date().toISOString()
+      }));
+      await supabase.from('penalties').upsert(dbPayload);
+    } catch (e) {}
+  }
+}
+
+/* ========================================================
+   LOCAL STORAGE READ HELPERS
+   ======================================================== */
+
+export function loadStoredTeams() {
+  const data = localStorage.getItem(STORAGE_KEYS.TEAMS);
+  if (!data) {
+    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(DEFAULT_DEMO_TEAMS));
+    return DEFAULT_DEMO_TEAMS;
+  }
+  try { return JSON.parse(data); } catch (e) { return DEFAULT_DEMO_TEAMS; }
+}
+
 export function loadStoredAttendance() {
   const data = localStorage.getItem(STORAGE_KEYS.ATTENDANCE);
   if (!data) {
@@ -562,37 +403,10 @@ export function loadStoredAttendance() {
   try { return JSON.parse(data); } catch (e) { return DEFAULT_ATTENDANCE; }
 }
 
-export function saveAttendance(attendance) {
-  localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendance));
-}
-
-/* --- MATCHES SYNC --- */
 export function loadStoredMatches() {
   const data = localStorage.getItem(STORAGE_KEYS.MATCHES);
   if (!data) return [];
   try { return JSON.parse(data); } catch (e) { return []; }
-}
-
-export function saveMatches(matches) {
-  localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(matches));
-  if (isSupabaseConfigured) {
-    matches.forEach(m => {
-      supabase.from('matches').upsert({
-        id: m.id,
-        name: m.name,
-        map: m.map,
-        room_id: m.roomId,
-        room_password: m.roomPassword,
-        is_final_round: m.isFinalRound,
-        status: m.status,
-        is_completed: m.isCompleted,
-        participating_teams: m.participatingTeams,
-        results: m.results,
-        created_at: m.createdAt,
-        completed_at: m.completedAt
-      }).then();
-    });
-  }
 }
 
 export function loadActiveMatch() {
@@ -609,7 +423,6 @@ export function saveActiveMatch(match) {
   }
 }
 
-/* --- MODERATORS SYNC --- */
 export function loadStoredModerators() {
   const data = localStorage.getItem(STORAGE_KEYS.MODERATORS);
   if (!data) {
@@ -622,24 +435,53 @@ export function loadStoredModerators() {
       ...m,
       permissions: { ...DEFAULT_PERMISSIONS, ...m.permissions }
     }));
-  } catch (e) {
-    return DEFAULT_MODERATORS;
-  }
+  } catch (e) { return DEFAULT_MODERATORS; }
 }
 
 export function saveStoredModerators(moderators) {
   localStorage.setItem(STORAGE_KEYS.MODERATORS, JSON.stringify(moderators));
 }
 
-/* --- PENALTIES SYNC --- */
 export function loadStoredPenalties() {
   const data = localStorage.getItem(STORAGE_KEYS.PENALTIES);
   if (!data) return [];
   try { return JSON.parse(data); } catch (e) { return []; }
 }
 
-export function saveStoredPenalties(penalties) {
-  localStorage.setItem(STORAGE_KEYS.PENALTIES, JSON.stringify(penalties));
+/* ========================================================
+   SUPABASE REALTIME SUBSCRIPTION FOR UNIVERSAL SYNC
+   ======================================================== */
+
+export function subscribeToRealtimeSync(onUniversalUpdate) {
+  let supabaseChannel = null;
+
+  // 1. Supabase Realtime Cloud Listener (Cross-Device & Cross-User)
+  if (isSupabaseConfigured) {
+    try {
+      supabaseChannel = supabase
+        .channel('bgmi_realtime_broadcast')
+        .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => {
+          onUniversalUpdate(payload);
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime subscription error:', e);
+    }
+  }
+
+  // 2. BroadcastChannel Listener (Multi-Tab local sync)
+  if (syncChannel) {
+    syncChannel.onmessage = (event) => {
+      onUniversalUpdate(event.data);
+    };
+  }
+
+  // Cleanup function
+  return () => {
+    if (supabaseChannel) {
+      try { supabase.removeChannel(supabaseChannel); } catch (e) {}
+    }
+  };
 }
 
 export function resetDemoData() {

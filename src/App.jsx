@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import EsportsLandingHero from './components/EsportsLandingHero';
 import RegistrationForm from './components/RegistrationForm';
@@ -18,19 +18,23 @@ import {
   loadStoredAttendance,
   saveAttendance,
   loadStoredMatches,
-  saveMatches,
   loadActiveMatch,
-  saveActiveMatch,
   loadStoredModerators,
   saveStoredModerators,
   loadStoredPenalties,
-  saveStoredPenalties,
+  savePenalties,
+  saveMatchesAndActive,
+  fetchTeamsCloud,
+  fetchAttendanceCloud,
+  fetchMatchesCloud,
+  fetchPenaltiesCloud,
+  subscribeToRealtimeSync,
   STORAGE_KEYS,
   getDefaultEventDate
 } from './utils/storage';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('home'); // Starts on the stunning Esports Landing Hero page
+  const [activeTab, setActiveTab] = useState('home');
   const [session, setSession] = useState({ role: 'user', username: 'Guest' });
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [targetRoleForModal, setTargetRoleForModal] = useState('admin');
@@ -45,6 +49,42 @@ export default function App() {
   const [eventDateIso, setEventDateIso] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.EVENT_DATE) || getDefaultEventDate();
   });
+
+  // Universal Sync Loader from Supabase Cloud / Local
+  const reloadUniversalData = useCallback(async () => {
+    try {
+      const [cloudTeams, cloudAttendance, cloudMatchesRes, cloudPenalties] = await Promise.all([
+        fetchTeamsCloud(),
+        fetchAttendanceCloud(),
+        fetchMatchesCloud(),
+        fetchPenaltiesCloud()
+      ]);
+
+      if (cloudTeams) setTeams(cloudTeams);
+      if (cloudAttendance) setAttendance(cloudAttendance);
+      if (cloudMatchesRes) {
+        setMatches(cloudMatchesRes.completedMatches || []);
+        setActiveMatch(cloudMatchesRes.activeMatch || null);
+      }
+      if (cloudPenalties) setPenalties(cloudPenalties);
+    } catch (e) {
+      console.warn('Data sync reload error:', e);
+    }
+  }, []);
+
+  // Initial Data Load & Real-Time Universal Listener
+  useEffect(() => {
+    reloadUniversalData();
+
+    // Subscribe to Supabase Realtime & BroadcastChannel updates
+    const unsubscribe = subscribeToRealtimeSync((updatePayload) => {
+      reloadUniversalData();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [reloadUniversalData]);
 
   // URL Query / Link-based Access Detector (?panel=admin or ?panel=moderator)
   useEffect(() => {
@@ -61,60 +101,62 @@ export default function App() {
     }
   }, []);
 
-  // Sync state to localStorage
-  useEffect(() => { saveTeams(teams); }, [teams]);
-  useEffect(() => { saveAttendance(attendance); }, [attendance]);
-  useEffect(() => { saveMatches(matches); }, [matches]);
-  useEffect(() => { saveActiveMatch(activeMatch); }, [activeMatch]);
+  // Local Sync Effects
   useEffect(() => { saveStoredModerators(moderators); }, [moderators]);
-  useEffect(() => { saveStoredPenalties(penalties); }, [penalties]);
   useEffect(() => { localStorage.setItem(STORAGE_KEYS.EVENT_DATE, eventDateIso); }, [eventDateIso]);
 
-  // Handlers
-  const handleAddTeam = (newTeam) => {
+  // Handlers for Admin / Moderator / User Actions with Universal Sync
+  const handleAddTeam = async (newTeam) => {
     const updated = [newTeam, ...teams];
     setTeams(updated);
-    setAttendance(prev => ({ ...prev, [newTeam.id]: true }));
+    const updatedAttendance = { ...attendance, [newTeam.id]: true };
+    setAttendance(updatedAttendance);
+    
+    await saveTeams(updated);
+    await saveAttendance(updatedAttendance);
   };
 
-  const handleUpdateTeam = (updatedTeam) => {
-    setTeams(teams.map(t => t.id === updatedTeam.id ? updatedTeam : t));
+  const handleUpdateTeam = async (updatedTeam) => {
+    const updated = teams.map(t => t.id === updatedTeam.id ? updatedTeam : t);
+    setTeams(updated);
+    await saveTeams(updated);
   };
 
-  const handleToggleAttendance = (teamId) => {
-    setAttendance(prev => ({
-      ...prev,
-      [teamId]: !prev[teamId]
-    }));
-  };
-
-  const handleMarkAllAttendance = (status) => {
-    const updated = {};
-    teams.forEach(t => {
-      updated[t.id] = status;
-    });
+  const handleToggleAttendance = async (teamId) => {
+    const updated = { ...attendance, [teamId]: !attendance[teamId] };
     setAttendance(updated);
+    await saveAttendance(updated);
   };
 
-  const handleCreateMatch = (matchData) => {
+  const handleMarkAllAttendance = async (status) => {
+    const updated = {};
+    teams.forEach(t => { updated[t.id] = status; });
+    setAttendance(updated);
+    await saveAttendance(updated);
+  };
+
+  const handleCreateMatch = async (matchData) => {
     setActiveMatch(matchData);
     setActiveTab('admin');
+    await saveMatchesAndActive(matches, matchData);
   };
 
-  const handlePublishMatch = () => {
+  const handlePublishMatch = async () => {
     if (!activeMatch) return;
     const updated = { ...activeMatch, status: 'PUBLISHED' };
     setActiveMatch(updated);
     setActiveTab('public-match');
+    await saveMatchesAndActive(matches, updated);
   };
 
-  const handleStartMatch = () => {
+  const handleStartMatch = async () => {
     if (!activeMatch) return;
     const updated = { ...activeMatch, status: 'LIVE' };
     setActiveMatch(updated);
+    await saveMatchesAndActive(matches, updated);
   };
 
-  const handleFinishMatch = (results) => {
+  const handleFinishMatch = async (results) => {
     if (!activeMatch) return;
 
     const completedMatchData = {
@@ -129,18 +171,24 @@ export default function App() {
     setMatches(updatedMatches);
     setActiveMatch(null);
     setActiveTab('leaderboard');
+    await saveMatchesAndActive(updatedMatches, null);
   };
 
-  const handleCancelMatch = () => {
+  const handleCancelMatch = async () => {
     setActiveMatch(null);
+    await saveMatchesAndActive(matches, null);
   };
 
-  const handleAddPenalty = (penalty) => {
-    setPenalties([penalty, ...penalties]);
+  const handleAddPenalty = async (penalty) => {
+    const updated = [penalty, ...penalties];
+    setPenalties(updated);
+    await savePenalties(updated);
   };
 
-  const handleDeletePenalty = (penaltyId) => {
-    setPenalties(penalties.filter(p => p.id !== penaltyId));
+  const handleDeletePenalty = async (penaltyId) => {
+    const updated = penalties.filter(p => p.id !== penaltyId);
+    setPenalties(updated);
+    await savePenalties(updated);
   };
 
   const handleLoginSuccess = (sessionObj) => {
@@ -272,10 +320,9 @@ export default function App() {
         moderators={moderators}
       />
 
-      {/* Esports Footer matching reference design */}
+      {/* Esports Footer */}
       <footer className="border-t border-slate-900 bg-[#04060a] py-12 text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-          
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <span className="font-display font-black text-2xl text-white">BGMI <span className="text-emerald-400">CLUB</span></span>
@@ -320,7 +367,6 @@ export default function App() {
               </button>
             </div>
           </div>
-
         </div>
 
         <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
