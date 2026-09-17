@@ -163,7 +163,10 @@ export function calculateLeaderboard(teams, matches = [], penalties = []) {
         continue;
       }
 
+      const hasStats = item.matchesPlayed > 0 || item.totalPoints > 0 || item.totalKills > 0;
+
       const isExactlyTied = 
+        hasStats &&
         item.totalPoints === prev.totalPoints &&
         item.totalKills === prev.totalKills &&
         item.wwcdCount === prev.wwcdCount &&
@@ -175,9 +178,11 @@ export function calculateLeaderboard(teams, matches = [], penalties = []) {
         prev.isTied = true;
       } else {
         item.rank = i + 1;
+        item.isTied = false;
       }
     } else {
       item.rank = 1;
+      item.isTied = false;
     }
   }
 
