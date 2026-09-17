@@ -32,7 +32,8 @@ import {
   fetchModeratorsCloud,
   fetchEventDateCloud,
   subscribeToRealtimeSync,
-  getDefaultEventDate
+  getDefaultEventDate,
+  DEFAULT_PERMISSIONS
 } from './utils/storage';
 
 export default function App() {
@@ -48,6 +49,11 @@ export default function App() {
   const [moderators, setModerators] = useState(loadStoredModerators);
   const [penalties, setPenalties] = useState(loadStoredPenalties);
   const [eventDateIso, setEventDateIso] = useState(getDefaultEventDate);
+
+  const isUser = session.role === 'user';
+  const isAdmin = session.role === 'admin';
+  const perms = session.moderatorObj?.permissions || DEFAULT_PERMISSIONS;
+  const canVerifyAttendance = isAdmin || (session.role === 'moderator' && perms.verifyTeams);
 
   // Universal Sync Loader from Supabase Cloud / Local
   const reloadUniversalData = useCallback(async () => {
@@ -79,7 +85,6 @@ export default function App() {
   useEffect(() => {
     reloadUniversalData();
 
-    // Subscribe to Supabase Realtime & BroadcastChannel updates
     const unsubscribe = subscribeToRealtimeSync((updatePayload) => {
       reloadUniversalData();
     });
@@ -263,12 +268,23 @@ export default function App() {
               eventDateIso={eventDateIso}
               onUpdateEventDate={handleUpdateEventDate}
             />
-            <ModeratorAttendance
-              teams={teams}
-              attendance={attendance}
-              onToggleAttendance={handleToggleAttendance}
-              onMarkAll={handleMarkAllAttendance}
-            />
+
+            {/* Attendance checklist rendered ONLY for Staff (Admin/Moderators with verifyTeams permission) */}
+            {canVerifyAttendance ? (
+              <ModeratorAttendance
+                teams={teams}
+                attendance={attendance}
+                onToggleAttendance={handleToggleAttendance}
+                onMarkAll={handleMarkAllAttendance}
+              />
+            ) : (
+              <div className="glass-panel p-8 rounded-3xl border border-slate-800 text-center max-w-2xl mx-auto space-y-2">
+                <div className="font-display font-bold text-white text-lg">📢 MATCH DAY ADVISORY</div>
+                <p className="text-slate-400 text-xs">
+                  All team leaders must be present in the esports lobby on match day. Room credentials and assigned slot numbers will be published in the <strong className="text-amber-400">Match Room</strong> tab when match lobbies open!
+                </p>
+              </div>
+            )}
           </div>
         )}
 

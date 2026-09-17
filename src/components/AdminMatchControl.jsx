@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ShieldCheck, 
   Map, 
@@ -14,7 +14,11 @@ import {
   Flame,
   Award,
   Swords,
-  Lock
+  Lock,
+  Filter,
+  Users,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { calculateMatchScore } from '../utils/scoring';
 
@@ -38,7 +42,6 @@ export default function AdminMatchControl({
   onFinishMatch,
   onCancelMatch
 }) {
-  const isUser = session.role === 'user';
   const isAdmin = session.role === 'admin';
   const perms = session.moderatorObj?.permissions || {
     matchSetup: true,
@@ -62,22 +65,91 @@ export default function AdminMatchControl({
   const [isFinalRound, setIsFinalRound] = useState(false);
   const [slotAssignments, setSlotAssignments] = useState({});
 
+  // Team Selection & Filter by Matches Played State
+  const [matchesPlayedFilter, setMatchesPlayedFilter] = useState('ALL'); // 'ALL', '0', '1', '2+'
+  const [selectedTeamIds, setSelectedTeamIds] = useState(() => {
+    // Default select all present teams
+    return teams.filter(t => attendance[t.id] === true).map(t => t.id);
+  });
+
   // Score Entry Modal State
   const [showScoreEntry, setShowScoreEntry] = useState(false);
   const [matchResultsInput, setMatchResultsInput] = useState({});
 
-  // Get present teams
-  const presentTeams = teams.filter(t => attendance[t.id] === true);
+  // Compute matches played per team
+  const matchesPlayedMap = useMemo(() => {
+    const map = {};
+    teams.forEach(t => { map[t.id] = 0; });
+    completedMatches.forEach(m => {
+      if (m.results) {
+        m.results.forEach(r => {
+          if (map[r.teamId] !== undefined) {
+            map[r.teamId] += 1;
+          }
+        });
+      }
+    });
+    return map;
+  }, [teams, completedMatches]);
 
-  // Randomize Slot Assignments
+  // Present teams
+  const presentTeams = useMemo(() => {
+    return teams.filter(t => attendance[t.id] === true);
+  }, [teams, attendance]);
+
+  // Filtered present teams by matches played
+  const filteredPresentTeams = useMemo(() => {
+    return presentTeams.filter(t => {
+      const count = matchesPlayedMap[t.id] || 0;
+      if (matchesPlayedFilter === '0') return count === 0;
+      if (matchesPlayedFilter === '1') return count === 1;
+      if (matchesPlayedFilter === '2+') return count >= 2;
+      return true;
+    });
+  }, [presentTeams, matchesPlayedMap, matchesPlayedFilter]);
+
+  // Teams selected for this match
+  const selectedTeamsList = useMemo(() => {
+    return presentTeams.filter(t => selectedTeamIds.includes(t.id));
+  }, [presentTeams, selectedTeamIds]);
+
+  // Toggle single team selection
+  const handleToggleTeamSelect = (teamId) => {
+    if (selectedTeamIds.includes(teamId)) {
+      setSelectedTeamIds(selectedTeamIds.filter(id => id !== teamId));
+    } else {
+      setSelectedTeamIds([...selectedTeamIds, teamId]);
+    }
+  };
+
+  // Quick Selection Helpers
+  const handleSelectFiltered = () => {
+    const filteredIds = filteredPresentTeams.map(t => t.id);
+    const combined = Array.from(new Set([...selectedTeamIds, ...filteredIds]));
+    setSelectedTeamIds(combined);
+  };
+
+  const handleSelectZeroMatchesOnly = () => {
+    const zeroIds = presentTeams.filter(t => (matchesPlayedMap[t.id] || 0) === 0).map(t => t.id);
+    setSelectedTeamIds(zeroIds);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedTeamIds([]);
+  };
+
+  // Randomize Slot Assignments for Selected Teams
   const handleRandomizeSlots = () => {
     if (!canLobby) {
-      alert('Permission Denied: Admin has not granted "Manage Lobbies" permission to your account.');
+      alert('Permission Denied: Admin has not granted "Manage Lobbies" permission.');
       return;
     }
-    if (presentTeams.length === 0) return;
+    if (selectedTeamsList.length === 0) {
+      alert('Please select at least one participating team.');
+      return;
+    }
 
-    const shuffled = [...presentTeams].sort(() => Math.random() - 0.5);
+    const shuffled = [...selectedTeamsList].sort(() => Math.random() - 0.5);
     const newAssignments = {};
 
     shuffled.forEach((team, idx) => {
@@ -91,7 +163,7 @@ export default function AdminMatchControl({
   const handleCreateMatchSubmit = (e) => {
     e.preventDefault();
     if (!canSetup) {
-      alert('Permission Denied: Admin has not granted "Match Setup" permission to your account.');
+      alert('Permission Denied: Admin has not granted "Match Setup" permission.');
       return;
     }
 
@@ -100,14 +172,14 @@ export default function AdminMatchControl({
       return;
     }
 
-    if (presentTeams.length === 0) {
-      alert('No present teams found! Please verify team attendance in Moderator mode first.');
+    if (selectedTeamsList.length === 0) {
+      alert('No teams selected for this match! Please check team checkboxes below.');
       return;
     }
 
     let currentSlots = slotAssignments;
     if (Object.keys(currentSlots).length === 0) {
-      const shuffled = [...presentTeams].sort(() => Math.random() - 0.5);
+      const shuffled = [...selectedTeamsList].sort(() => Math.random() - 0.5);
       shuffled.forEach((team, idx) => {
         currentSlots[team.id] = idx + 2;
       });
@@ -123,7 +195,7 @@ export default function AdminMatchControl({
       isFinalRound: isFinalRound,
       status: 'DRAFT',
       createdAt: new Date().toISOString(),
-      participatingTeams: presentTeams.map(t => ({
+      participatingTeams: selectedTeamsList.map(t => ({
         teamId: t.id,
         teamName: t.teamName,
         leaderName: t.leaderName,
@@ -138,14 +210,14 @@ export default function AdminMatchControl({
   // Open Score Entry Modal
   const handleOpenScoreEntry = () => {
     if (!canScore) {
-      alert('Permission Denied: Admin has not granted "Enter Scores" permission to your account.');
+      alert('Permission Denied: Admin has not granted "Enter Scores" permission.');
       return;
     }
     if (!activeMatch) return;
     const initialInputs = {};
     activeMatch.participatingTeams.forEach((team, idx) => {
       initialInputs[team.teamId] = {
-        position: Math.min(idx + 1, 6), // Default position between 1 and 6+
+        position: Math.min(idx + 1, 6),
         kills: 0
       };
     });
@@ -184,22 +256,22 @@ export default function AdminMatchControl({
       <div className="bg-gradient-to-r from-slate-900 via-[#182030] to-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 hud-border">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <ShieldCheck className="w-3.5 h-3.5" /> Match Command & Lobby Management
+            <ShieldCheck className="w-3.5 h-3.5" /> Match Command & Custom Team Selection
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl text-white tracking-wide">
-            MATCH & LOBBY <span className="text-amber-400">CONTROL</span>
+            MATCH & LOBBY <span className="text-amber-400">CREATOR</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Create match rooms, randomly shuffle slot numbers, launch live 10s start timers, and compute scores.
+            Choose participating teams, filter by matches played, shuffle slot numbers, and launch live matches.
           </p>
         </div>
 
-        {/* Present Teams Count */}
+        {/* Selected Teams Count */}
         <div className="bg-[#0b0e14] p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
           <Gamepad className="w-8 h-8 text-amber-400" />
           <div>
-            <div className="text-xs text-slate-400 font-bold uppercase">Verified Present Teams</div>
-            <div className="font-display font-black text-2xl text-white">{presentTeams.length} Teams</div>
+            <div className="text-xs text-slate-400 font-bold uppercase">Selected for Match</div>
+            <div className="font-display font-black text-2xl text-emerald-400">{selectedTeamsList.length} / {presentTeams.length} Teams</div>
           </div>
         </div>
       </div>
@@ -237,8 +309,6 @@ export default function AdminMatchControl({
 
             {/* Action Flow Buttons */}
             <div className="flex flex-wrap items-center gap-3">
-              
-              {/* Action 1: Make Match Public */}
               {activeMatch.status === 'DRAFT' && (
                 <button
                   onClick={onPublishMatch}
@@ -248,12 +318,11 @@ export default function AdminMatchControl({
                 </button>
               )}
 
-              {/* Action 2: Start Game (10s Timer) */}
               {activeMatch.status === 'PUBLISHED' && (
                 <button
                   onClick={() => {
                     if (!canStart) {
-                      alert('Permission Denied: Admin has not granted "Start Match" permission to your account.');
+                      alert('Permission Denied: Admin has not granted "Start Match" permission.');
                       return;
                     }
                     onStartMatch();
@@ -264,7 +333,6 @@ export default function AdminMatchControl({
                 </button>
               )}
 
-              {/* Action 3: End Match & Score Entry */}
               {(activeMatch.status === 'LIVE' || activeMatch.status === 'PUBLISHED') && (
                 <button
                   onClick={handleOpenScoreEntry}
@@ -274,14 +342,12 @@ export default function AdminMatchControl({
                 </button>
               )}
 
-              {/* Cancel Match Draft */}
               <button
                 onClick={onCancelMatch}
                 className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-red-400 border border-slate-800 text-xs font-bold transition"
               >
                 Cancel Match
               </button>
-
             </div>
           </div>
 
@@ -289,7 +355,7 @@ export default function AdminMatchControl({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-display font-bold text-lg text-white tracking-wide flex items-center gap-2">
-                <Shuffle className="w-5 h-5 text-amber-400" /> Room Slot Allocations (by Team Leader)
+                <Shuffle className="w-5 h-5 text-amber-400" /> Room Slot Allocations ({activeMatch.participatingTeams?.length} Teams)
               </h3>
               <span className="text-xs text-slate-400 font-medium">Slot 1 Reserved for Spectator</span>
             </div>
@@ -330,7 +396,6 @@ export default function AdminMatchControl({
               </h2>
             </div>
 
-            {/* Final Round Toggle */}
             <label className="flex items-center gap-2 cursor-pointer bg-slate-900 hover:bg-slate-800 px-4 py-2 rounded-xl border border-slate-800 transition">
               <input
                 type="checkbox"
@@ -345,8 +410,6 @@ export default function AdminMatchControl({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/* Match Title */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
                 Match Title / Sequence *
@@ -361,7 +424,6 @@ export default function AdminMatchControl({
               />
             </div>
 
-            {/* Room Credentials */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <Key className="w-3.5 h-3.5 text-amber-400" /> Room Credentials (ID & Password) *
@@ -385,7 +447,6 @@ export default function AdminMatchControl({
                 />
               </div>
             </div>
-
           </div>
 
           {/* Map Selector */}
@@ -415,78 +476,171 @@ export default function AdminMatchControl({
             </div>
           </div>
 
-          {/* RANDOM SLOT GENERATOR SECTION */}
+          {/* TEAM SELECTION & MATCHES PLAYED FILTER SECTION */}
           <div className="p-6 bg-[#0c1018] rounded-2xl border border-slate-800 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
                 <h3 className="font-display font-bold text-lg text-white flex items-center gap-2">
-                  <Shuffle className="w-5 h-5 text-amber-400" /> Manage Lobbies: Random Team Slot Generator
+                  <Users className="w-5 h-5 text-amber-400" /> Select Teams Participating in Match
                 </h3>
                 <p className="text-slate-400 text-xs mt-0.5">
-                  Click to randomly arrange verified present teams into room slot numbers (Slot 2 to Slot 25).
+                  Check squad boxes to include in match. Filter teams by total matches played to balance game time.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleRandomizeSlots}
-                disabled={presentTeams.length === 0 || !canLobby}
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 text-black font-extrabold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2 self-start sm:self-auto"
-              >
-                <Shuffle className="w-4 h-4" /> ⚡ Randomly Arrange Slots
-              </button>
+              {/* Filter by Matches Played */}
+              <div className="flex items-center gap-2 overflow-x-auto">
+                <span className="text-xs font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wider mr-1">
+                  <Filter className="w-3.5 h-3.5 text-amber-400" /> Filter:
+                </span>
+                {[
+                  { id: 'ALL', label: 'All Present' },
+                  { id: '0', label: '0 Matches' },
+                  { id: '1', label: '1 Match' },
+                  { id: '2+', label: '2+ Matches' }
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setMatchesPlayedFilter(f.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                      matchesPlayedFilter === f.id
+                        ? 'bg-amber-500 text-black font-extrabold shadow-md'
+                        : 'bg-[#131926] text-slate-400 hover:text-white border border-slate-800'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Live Preview of Slot Arrangement */}
-            {presentTeams.length === 0 ? (
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" />
-                <span>No verified present teams available. Mark team attendance in <strong>Event & Attendance</strong> tab first.</span>
+            {/* Quick Selection Helpers */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSelectFiltered}
+                  className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold rounded-xl transition"
+                >
+                  ✓ Select All Filtered ({filteredPresentTeams.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSelectZeroMatchesOnly}
+                  className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold rounded-xl transition"
+                >
+                  🎯 Select 0 Matches Played Only
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeselectAll}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold rounded-xl transition"
+                >
+                  ✕ Deselect All
+                </button>
+              </div>
+
+              <div className="font-mono text-amber-400 font-bold">
+                {selectedTeamsList.length} / {presentTeams.length} Teams Selected
+              </div>
+            </div>
+
+            {/* Team Selection Checkboxes Grid */}
+            {filteredPresentTeams.length === 0 ? (
+              <div className="p-6 text-center text-slate-500 text-xs">
+                No verified present teams match the selected "Matches Played" filter.
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {presentTeams.map((team, idx) => {
-                  const assignedSlot = slotAssignments[team.id] || (idx + 2);
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-2">
+                {filteredPresentTeams.map((team) => {
+                  const isSelected = selectedTeamIds.includes(team.id);
+                  const playedCount = matchesPlayedMap[team.id] || 0;
+                  const assignedSlot = slotAssignments[team.id];
+
                   return (
-                    <div key={team.id} className="p-3 bg-[#131926] rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-                      <div>
-                        <div className="font-bold text-white">{team.teamName}</div>
-                        <div className="text-[10px] text-slate-400">Leader: {team.leaderName}</div>
+                    <div
+                      key={team.id}
+                      onClick={() => handleToggleTeamSelect(team.id)}
+                      className={`p-3.5 rounded-2xl border cursor-pointer transition flex items-center justify-between ${
+                        isSelected
+                          ? 'bg-amber-500/10 border-amber-500/50 text-white shadow-md'
+                          : 'bg-[#131926] border-slate-800 text-slate-400 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {isSelected ? (
+                          <CheckSquare className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                        ) : (
+                          <Square className="w-5 h-5 text-slate-600 flex-shrink-0" />
+                        )}
+                        <div>
+                          <div className="font-bold text-white text-sm">{team.teamName}</div>
+                          <div className="text-[10px] text-slate-400">Leader: {team.leaderName}</div>
+                        </div>
                       </div>
-                      <div className="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-lg font-mono font-extrabold text-sm">
-                        Slot #{assignedSlot}
+
+                      <div className="text-right">
+                        <span className={`px-2 py-0.5 text-[10px] rounded-full font-mono font-bold ${
+                          playedCount === 0
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {playedCount} Matches
+                        </span>
+                        {assignedSlot && isSelected && (
+                          <div className="text-[10px] font-mono text-amber-400 font-extrabold mt-1">
+                            Slot #{assignedSlot}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
             )}
+
+            {/* Random Slot Generator Action */}
+            <div className="pt-3 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <span className="text-xs text-slate-400">
+                Randomize slot numbers (Slot 2+) for the <strong className="text-amber-400">{selectedTeamsList.length} selected teams</strong>:
+              </span>
+
+              <button
+                type="button"
+                onClick={handleRandomizeSlots}
+                disabled={selectedTeamsList.length === 0 || !canLobby}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 text-black font-extrabold text-xs uppercase tracking-wider transition shadow-md flex items-center gap-2 self-start sm:self-auto"
+              >
+                <Shuffle className="w-4 h-4" /> ⚡ Shuffle Slot Numbers
+              </button>
+            </div>
+
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={presentTeams.length === 0 || !canSetup}
+            disabled={selectedTeamsList.length === 0 || !canSetup}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 text-black font-display font-black text-base uppercase tracking-wider transition shadow-xl shadow-amber-500/20"
           >
-            Create Match & Lock Slot Arrangement
+            Create Match Room ({selectedTeamsList.length} Teams Selected)
           </button>
 
         </form>
       )}
 
-      {/* SCORE ENTRY MODAL WITH EXPLICIT 6 POSITION OPTIONS */}
+      {/* SCORE ENTRY MODAL */}
       {showScoreEntry && activeMatch && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
           <div className="glass-panel max-w-3xl w-full p-6 sm:p-8 rounded-3xl border border-amber-500/40 shadow-2xl space-y-6 my-8">
-            
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div>
                 <h3 className="font-display font-black text-2xl text-white flex items-center gap-2">
                   <Trophy className="w-6 h-6 text-amber-400" /> END MATCH & ENTER SCORES
                 </h3>
                 <p className="text-slate-400 text-xs mt-1">
-                  Select finish position (1st, 2nd, 3rd, 4th, 5th, 6th+) and kill counts. Scores automatically calculated!
+                  Select finish position (1st to 6th+) and kill counts for participating teams.
                 </p>
               </div>
 
@@ -498,13 +652,11 @@ export default function AdminMatchControl({
               </button>
             </div>
 
-            {/* Score Formula Reminder */}
             <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs font-semibold flex items-center justify-between">
               <span>🥇 1st: 6pt | 🥈 2nd: 4pt | 🥉 3rd: 2pt | 4th-5th: 1pt | 6th+: 0pt | Kills: 2pt each</span>
               <span className="font-mono text-white">Score = Position Bonus + (Kills × 2)</span>
             </div>
 
-            {/* Team Results Input List */}
             <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
               {activeMatch.participatingTeams.map((team) => {
                 const input = matchResultsInput[team.teamId] || { position: 1, kills: 0 };
@@ -518,7 +670,6 @@ export default function AdminMatchControl({
                     </div>
 
                     <div className="flex items-center gap-4">
-                      {/* Position Selection (Explicit 6 Options: 1, 2, 3, 4, 5, 6+) */}
                       <div>
                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Rank / Position *</label>
                         <select
@@ -527,7 +678,7 @@ export default function AdminMatchControl({
                             ...matchResultsInput,
                             [team.teamId]: { ...input, position: parseInt(e.target.value, 10) }
                           })}
-                          className="px-3.5 py-2 bg-[#141b29] border border-amber-500/40 rounded-xl text-xs text-amber-400 font-bold focus:outline-none focus:border-amber-400"
+                          className="px-3.5 py-2 bg-[#141b29] border border-amber-500/40 rounded-xl text-xs text-amber-400 font-bold focus:outline-none"
                         >
                           <option value="1">🥇 1st Place (6 pts)</option>
                           <option value="2">🥈 2nd Place (4 pts)</option>
@@ -538,7 +689,6 @@ export default function AdminMatchControl({
                         </select>
                       </div>
 
-                      {/* Kills Input */}
                       <div>
                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Kills (×2 pts)</label>
                         <input
@@ -553,7 +703,6 @@ export default function AdminMatchControl({
                         />
                       </div>
 
-                      {/* Score Preview */}
                       <div className="text-right min-w-24">
                         <div className="text-[10px] text-slate-400">Match Score</div>
                         <div className="font-display font-black text-xl text-amber-400">
@@ -566,7 +715,6 @@ export default function AdminMatchControl({
               })}
             </div>
 
-            {/* Actions */}
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
               <button
                 onClick={() => setShowScoreEntry(false)}
@@ -581,7 +729,6 @@ export default function AdminMatchControl({
                 Submit & Publish Match Scores
               </button>
             </div>
-
           </div>
         </div>
       )}
