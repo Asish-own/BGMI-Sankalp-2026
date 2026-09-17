@@ -24,12 +24,14 @@ import {
   loadStoredPenalties,
   savePenalties,
   saveMatchesAndActive,
+  saveEventDate,
   fetchTeamsCloud,
   fetchAttendanceCloud,
   fetchMatchesCloud,
   fetchPenaltiesCloud,
+  fetchModeratorsCloud,
+  fetchEventDateCloud,
   subscribeToRealtimeSync,
-  STORAGE_KEYS,
   getDefaultEventDate
 } from './utils/storage';
 
@@ -45,19 +47,18 @@ export default function App() {
   const [activeMatch, setActiveMatch] = useState(loadActiveMatch);
   const [moderators, setModerators] = useState(loadStoredModerators);
   const [penalties, setPenalties] = useState(loadStoredPenalties);
-
-  const [eventDateIso, setEventDateIso] = useState(() => {
-    return localStorage.getItem(STORAGE_KEYS.EVENT_DATE) || getDefaultEventDate();
-  });
+  const [eventDateIso, setEventDateIso] = useState(getDefaultEventDate);
 
   // Universal Sync Loader from Supabase Cloud / Local
   const reloadUniversalData = useCallback(async () => {
     try {
-      const [cloudTeams, cloudAttendance, cloudMatchesRes, cloudPenalties] = await Promise.all([
+      const [cloudTeams, cloudAttendance, cloudMatchesRes, cloudPenalties, cloudMods, cloudEventDate] = await Promise.all([
         fetchTeamsCloud(),
         fetchAttendanceCloud(),
         fetchMatchesCloud(),
-        fetchPenaltiesCloud()
+        fetchPenaltiesCloud(),
+        fetchModeratorsCloud(),
+        fetchEventDateCloud()
       ]);
 
       if (cloudTeams) setTeams(cloudTeams);
@@ -67,6 +68,8 @@ export default function App() {
         setActiveMatch(cloudMatchesRes.activeMatch || null);
       }
       if (cloudPenalties) setPenalties(cloudPenalties);
+      if (cloudMods) setModerators(cloudMods);
+      if (cloudEventDate) setEventDateIso(cloudEventDate);
     } catch (e) {
       console.warn('Data sync reload error:', e);
     }
@@ -101,11 +104,17 @@ export default function App() {
     }
   }, []);
 
-  // Local Sync Effects
-  useEffect(() => { saveStoredModerators(moderators); }, [moderators]);
-  useEffect(() => { localStorage.setItem(STORAGE_KEYS.EVENT_DATE, eventDateIso); }, [eventDateIso]);
+  // Handlers with Universal Cloud Sync
+  const handleUpdateEventDate = async (newDateIso) => {
+    setEventDateIso(newDateIso);
+    await saveEventDate(newDateIso);
+  };
 
-  // Handlers for Admin / Moderator / User Actions with Universal Sync
+  const handleUpdateModerators = async (updatedMods) => {
+    setModerators(updatedMods);
+    await saveStoredModerators(updatedMods);
+  };
+
   const handleAddTeam = async (newTeam) => {
     const updated = [newTeam, ...teams];
     setTeams(updated);
@@ -252,7 +261,7 @@ export default function App() {
           <div className="space-y-8">
             <EventCountdown
               eventDateIso={eventDateIso}
-              onUpdateEventDate={setEventDateIso}
+              onUpdateEventDate={handleUpdateEventDate}
             />
             <ModeratorAttendance
               teams={teams}
@@ -288,7 +297,7 @@ export default function App() {
         {activeTab === 'moderator-mgmt' && session.role === 'admin' && (
           <ModeratorManager
             moderators={moderators}
-            onUpdateModerators={setModerators}
+            onUpdateModerators={handleUpdateModerators}
           />
         )}
 

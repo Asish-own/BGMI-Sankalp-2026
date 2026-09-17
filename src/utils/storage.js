@@ -171,6 +171,40 @@ export function broadcastLocalChange(type) {
    ======================================================== */
 
 /**
+ * Fetch Event Date universally
+ */
+export async function fetchEventDateCloud() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('settings').select('*').eq('key', 'event_date').single();
+      if (!error && data && data.value) {
+        localStorage.setItem(STORAGE_KEYS.EVENT_DATE, data.value);
+        return data.value;
+      }
+    } catch (e) {}
+  }
+  return localStorage.getItem(STORAGE_KEYS.EVENT_DATE) || getDefaultEventDate();
+}
+
+/**
+ * Save Event Date universally
+ */
+export async function saveEventDate(eventDateIso) {
+  localStorage.setItem(STORAGE_KEYS.EVENT_DATE, eventDateIso);
+  broadcastLocalChange('EVENT_DATE_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('settings').upsert({
+        key: 'event_date',
+        value: eventDateIso,
+        updated_at: new Date().toISOString()
+      });
+    } catch (e) {}
+  }
+}
+
+/**
  * Fetch all teams from Supabase Cloud or LocalStorage
  */
 export async function fetchTeamsCloud() {
@@ -288,7 +322,6 @@ export async function fetchMatchesCloud() {
           completedAt: m.completed_at
         }));
 
-        // Active match is the first non-completed published/draft/live match
         const active = formatted.find(m => !m.isCompleted && m.status !== 'FINISHED') || null;
         saveActiveMatch(active);
 
@@ -381,6 +414,51 @@ export async function savePenalties(penalties) {
   }
 }
 
+/**
+ * Fetch Moderators universally
+ */
+export async function fetchModeratorsCloud() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('moderators').select('*');
+      if (!error && data && data.length > 0) {
+        const formatted = data.map(m => ({
+          id: m.id,
+          username: m.username,
+          password: m.password,
+          name: m.name,
+          permissions: { ...DEFAULT_PERMISSIONS, ...(m.permissions || {}) }
+        }));
+        localStorage.setItem(STORAGE_KEYS.MODERATORS, JSON.stringify(formatted));
+        return formatted;
+      }
+    } catch (e) {}
+  }
+  return loadStoredModerators();
+}
+
+/**
+ * Save Moderators universally
+ */
+export async function saveStoredModerators(moderators) {
+  localStorage.setItem(STORAGE_KEYS.MODERATORS, JSON.stringify(moderators));
+  broadcastLocalChange('MODERATORS_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      const dbPayload = moderators.map(m => ({
+        id: m.id,
+        username: m.username,
+        password: m.password,
+        name: m.name,
+        permissions: m.permissions || DEFAULT_PERMISSIONS,
+        created_at: new Date().toISOString()
+      }));
+      await supabase.from('moderators').upsert(dbPayload);
+    } catch (e) {}
+  }
+}
+
 /* ========================================================
    LOCAL STORAGE READ HELPERS
    ======================================================== */
@@ -438,10 +516,6 @@ export function loadStoredModerators() {
   } catch (e) { return DEFAULT_MODERATORS; }
 }
 
-export function saveStoredModerators(moderators) {
-  localStorage.setItem(STORAGE_KEYS.MODERATORS, JSON.stringify(moderators));
-}
-
 export function loadStoredPenalties() {
   const data = localStorage.getItem(STORAGE_KEYS.PENALTIES);
   if (!data) return [];
@@ -455,7 +529,6 @@ export function loadStoredPenalties() {
 export function subscribeToRealtimeSync(onUniversalUpdate) {
   let supabaseChannel = null;
 
-  // 1. Supabase Realtime Cloud Listener (Cross-Device & Cross-User)
   if (isSupabaseConfigured) {
     try {
       supabaseChannel = supabase
@@ -469,14 +542,12 @@ export function subscribeToRealtimeSync(onUniversalUpdate) {
     }
   }
 
-  // 2. BroadcastChannel Listener (Multi-Tab local sync)
   if (syncChannel) {
     syncChannel.onmessage = (event) => {
       onUniversalUpdate(event.data);
     };
   }
 
-  // Cleanup function
   return () => {
     if (supabaseChannel) {
       try { supabase.removeChannel(supabaseChannel); } catch (e) {}

@@ -61,12 +61,20 @@ CREATE TABLE IF NOT EXISTS penalties (
   logged_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 6. SETTINGS TABLE (Event Date, Countdown, Global Config)
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Enable Row Level Security (RLS) & Grant Public Access for Tournament Platform
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE matches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE moderators ENABLE ROW LEVEL SECURITY;
 ALTER TABLE penalties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
 
 -- Allow Public Read and Write Access (for universal synchronization)
 DROP POLICY IF EXISTS "Allow public full access on teams" ON teams;
@@ -74,15 +82,17 @@ DROP POLICY IF EXISTS "Allow public full access on attendance" ON attendance;
 DROP POLICY IF EXISTS "Allow public full access on matches" ON matches;
 DROP POLICY IF EXISTS "Allow public full access on moderators" ON moderators;
 DROP POLICY IF EXISTS "Allow public full access on penalties" ON penalties;
+DROP POLICY IF EXISTS "Allow public full access on settings" ON settings;
 
 CREATE POLICY "Allow public full access on teams" ON teams FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public full access on attendance" ON attendance FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public full access on matches" ON matches FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public full access on moderators" ON moderators FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public full access on penalties" ON penalties FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public full access on settings" ON settings FOR ALL USING (true) WITH CHECK (true);
 
 -- Enable Supabase Realtime Engine for Universal Cross-User Sync
 BEGIN;
   DROP PUBLICATION IF EXISTS supabase_realtime;
-  CREATE PUBLICATION supabase_realtime FOR TABLE teams, attendance, matches, moderators, penalties;
+  CREATE PUBLICATION supabase_realtime FOR TABLE teams, attendance, matches, moderators, penalties, settings;
 COMMIT;
