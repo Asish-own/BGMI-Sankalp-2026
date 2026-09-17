@@ -344,23 +344,47 @@ export async function saveMatchesAndActive(matches, activeMatch) {
 
   if (isSupabaseConfigured) {
     try {
-      const allMatches = activeMatch ? [activeMatch, ...matches] : matches;
-      const dbPayload = allMatches.map(m => ({
-        id: m.id,
-        name: m.name,
-        map: m.map,
-        room_id: m.roomId,
-        room_password: m.roomPassword,
-        is_final_round: m.isFinalRound,
-        status: m.status,
-        is_completed: Boolean(m.isCompleted),
-        participating_teams: m.participatingTeams || [],
-        results: m.results || [],
-        created_at: m.createdAt || new Date().toISOString(),
-        completed_at: m.completedAt || null
-      }));
-      await supabase.from('matches').upsert(dbPayload);
-    } catch (e) {}
+      if (activeMatch) {
+        const allMatches = [activeMatch, ...matches];
+        const dbPayload = allMatches.map(m => ({
+          id: m.id,
+          name: m.name,
+          map: m.map,
+          room_id: m.roomId,
+          room_password: m.roomPassword,
+          is_final_round: Boolean(m.isFinalRound),
+          status: m.status,
+          is_completed: Boolean(m.isCompleted),
+          participating_teams: m.participatingTeams || [],
+          results: m.results || [],
+          created_at: m.createdAt || new Date().toISOString(),
+          completed_at: m.completedAt || null
+        }));
+        await supabase.from('matches').upsert(dbPayload);
+      } else {
+        if (matches.length > 0) {
+          const dbPayload = matches.map(m => ({
+            id: m.id,
+            name: m.name,
+            map: m.map,
+            room_id: m.roomId,
+            room_password: m.roomPassword,
+            is_final_round: Boolean(m.isFinalRound),
+            status: m.status,
+            is_completed: Boolean(m.isCompleted),
+            participating_teams: m.participatingTeams || [],
+            results: m.results || [],
+            created_at: m.createdAt || new Date().toISOString(),
+            completed_at: m.completedAt || null
+          }));
+          await supabase.from('matches').upsert(dbPayload);
+        }
+        // Mark any non-completed draft/published/live matches in DB as CANCELLED
+        await supabase.from('matches').update({ status: 'CANCELLED', is_completed: true }).in('status', ['DRAFT', 'PUBLISHED', 'LIVE']);
+      }
+    } catch (e) {
+      console.warn('Supabase match save error:', e);
+    }
   }
 }
 

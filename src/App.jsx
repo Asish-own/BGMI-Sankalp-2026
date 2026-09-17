@@ -151,8 +151,17 @@ export default function App() {
 
   const handleCreateMatch = async (matchData) => {
     setActiveMatch(matchData);
-    setActiveTab('admin');
+    if (matchData.status === 'PUBLISHED') {
+      setActiveTab('public-match');
+    } else {
+      setActiveTab('admin');
+    }
     await saveMatchesAndActive(matches, matchData);
+  };
+
+  const handleUpdateActiveMatch = async (updatedMatch) => {
+    setActiveMatch(updatedMatch);
+    await saveMatchesAndActive(matches, updatedMatch);
   };
 
   const handlePublishMatch = async () => {
@@ -303,6 +312,7 @@ export default function App() {
             activeMatch={activeMatch}
             completedMatches={matches}
             onCreateMatch={handleCreateMatch}
+            onUpdateActiveMatch={handleUpdateActiveMatch}
             onPublishMatch={handlePublishMatch}
             onStartMatch={handleStartMatch}
             onFinishMatch={handleFinishMatch}

@@ -35,7 +35,7 @@ export default function Navbar({
     { id: 'register', label: 'Register Squad', icon: UserPlus, show: true },
     { id: 'teams', label: 'Teams & Stats', icon: Users, badge: teamsCount, show: true },
     { id: 'event', label: 'Event Day', icon: Calendar, show: true },
-    { id: 'public-match', label: 'Match Room', icon: Gamepad2, pulse: !!activeMatch, show: true },
+    { id: 'public-match', label: 'Match Room', icon: Gamepad2, pulse: activeMatch && activeMatch.status !== 'DRAFT', show: true },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, show: true },
     
     // Admin / Moderator Only Tabs (Hidden for public users)

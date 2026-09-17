@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Gamepad2, Key, MapPin, Users, Copy, Check, Radio, Flame, Sparkles, Play } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Gamepad2, Key, MapPin, Users, Copy, Check, Radio, Flame, Sparkles, Play, ShieldAlert } from 'lucide-react';
 
 // Play futuristic countdown beep sound using HTML5 Web Audio API
 const playBeep = (freq = 600, duration = 0.15) => {
@@ -24,14 +24,19 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
   const [copiedId, setCopiedId] = useState(false);
   const [copiedPass, setCopiedPass] = useState(false);
 
+  // Sort participating teams by slot number ascending
+  const sortedTeams = useMemo(() => {
+    if (!activeMatch?.participatingTeams) return [];
+    return [...activeMatch.participatingTeams].sort((a, b) => (a.slotNumber || 0) - (b.slotNumber || 0));
+  }, [activeMatch]);
+
   // 10-Second Countdown State
-  const [countdown, setCountdown] = useState(null); // null or 10 down to 0
+  const [countdown, setCountdown] = useState(null);
   const [isLiveCountdownActive, setIsLiveCountdownActive] = useState(false);
 
   // Synchronize with match status
   useEffect(() => {
     if (activeMatch && activeMatch.status === 'LIVE' && !isLiveCountdownActive && countdown === null) {
-      // Trigger 10 second countdown broadcast
       setIsLiveCountdownActive(true);
       setCountdown(10);
       playBeep(800, 0.2);
@@ -47,7 +52,6 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
         if (nextVal > 0) {
           playBeep(700 + (10 - nextVal) * 40, 0.15);
         } else {
-          // Final 0 -> GO!
           playBeep(1200, 0.5);
         }
       }, 1000);
@@ -71,13 +75,18 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
     }
   };
 
-  if (!activeMatch) {
+  // If no match or match is in DRAFT state
+  if (!activeMatch || activeMatch.status === 'DRAFT') {
     return (
-      <div className="max-w-4xl mx-auto my-12 text-center glass-panel p-12 rounded-3xl border border-slate-800 space-y-4">
-        <Gamepad2 className="w-16 h-16 text-slate-600 mx-auto animate-pulse" />
-        <h2 className="font-display font-black text-2xl text-white">NO ACTIVE MATCH PUBLISHED</h2>
+      <div className="max-w-4xl mx-auto my-12 text-center glass-panel p-12 rounded-3xl border border-slate-800 space-y-4 hud-border">
+        <Gamepad2 className="w-16 h-16 text-amber-400 mx-auto animate-pulse" />
+        <h2 className="font-display font-black text-2xl text-white tracking-wide">
+          {activeMatch?.status === 'DRAFT' ? 'MATCH SETUP IN PROGRESS BY ADMIN' : 'NO ACTIVE MATCH PUBLISHED'}
+        </h2>
         <p className="text-slate-400 text-sm max-w-md mx-auto">
-          Match credentials and slot numbers will appear here once the tournament admin creates and publishes a room.
+          {activeMatch?.status === 'DRAFT'
+            ? 'Tournament Admin is configuring room slots and credentials. Room details will be revealed live universally as soon as published!'
+            : 'Match credentials and slot numbers will appear here live once the tournament admin creates and publishes a room.'}
         </p>
       </div>
     );
@@ -100,7 +109,7 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
                   {countdown}
                 </div>
                 <div className="font-display font-bold text-2xl sm:text-3xl text-white tracking-widest mt-4">
-                  GET READY PLAYERS!
+                  GET READY SURVIVORS!
                 </div>
               </div>
             ) : (
@@ -116,14 +125,14 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
       )}
 
       {/* Main Match Header Banner */}
-      <div className="relative overflow-hidden glass-panel p-6 sm:p-10 rounded-3xl border border-amber-500/30 shadow-2xl space-y-6">
+      <div className="relative overflow-hidden glass-panel p-6 sm:p-10 rounded-3xl border border-amber-500/40 shadow-2xl space-y-6 hud-border">
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold rounded-full uppercase tracking-wider">
-                Active Match Room
+                Official Live Room
               </span>
               {activeMatch.status === 'LIVE' && (
                 <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black rounded-full uppercase tracking-widest animate-pulse">
@@ -212,7 +221,7 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
             </div>
 
             {/* Participating Teams Slots */}
-            {activeMatch.participatingTeams?.map((pt) => (
+            {sortedTeams.map((pt) => (
               <div 
                 key={pt.teamId}
                 className="p-4 bg-[#0d121c] rounded-2xl border border-slate-800 hover:border-amber-500/40 transition flex items-center justify-between shadow-md group"

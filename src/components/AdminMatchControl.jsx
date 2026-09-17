@@ -37,6 +37,7 @@ export default function AdminMatchControl({
   activeMatch,
   completedMatches = [],
   onCreateMatch,
+  onUpdateActiveMatch,
   onPublishMatch,
   onStartMatch,
   onFinishMatch,
@@ -64,6 +65,12 @@ export default function AdminMatchControl({
   const [roomPassword, setRoomPassword] = useState('');
   const [isFinalRound, setIsFinalRound] = useState(false);
   const [slotAssignments, setSlotAssignments] = useState({});
+
+  // Active Match Live Edit State
+  const [isEditingActive, setIsEditingActive] = useState(false);
+  const [editRoomId, setEditRoomId] = useState('');
+  const [editRoomPassword, setEditRoomPassword] = useState('');
+  const [editMap, setEditMap] = useState('Erangel');
 
   // Team Selection & Filter by Matches Played State
   const [matchesPlayedFilter, setMatchesPlayedFilter] = useState('ALL'); // 'ALL', '0', '1', '2+'
@@ -159,9 +166,9 @@ export default function AdminMatchControl({
     setSlotAssignments(newAssignments);
   };
 
-  // Create & Save Match Draft
-  const handleCreateMatchSubmit = (e) => {
-    e.preventDefault();
+  // Create & Save Match (Draft or Direct Publish)
+  const handleCreateMatchSubmit = (e, initialStatus = 'PUBLISHED') => {
+    if (e) e.preventDefault();
     if (!canSetup) {
       alert('Permission Denied: Admin has not granted "Match Setup" permission.');
       return;
@@ -193,7 +200,7 @@ export default function AdminMatchControl({
       roomId: roomId.trim(),
       roomPassword: roomPassword.trim(),
       isFinalRound: isFinalRound,
-      status: 'DRAFT',
+      status: initialStatus, // 'PUBLISHED' or 'DRAFT'
       createdAt: new Date().toISOString(),
       participatingTeams: selectedTeamsList.map(t => ({
         teamId: t.id,
@@ -205,6 +212,25 @@ export default function AdminMatchControl({
     };
 
     onCreateMatch(matchData);
+  };
+
+  // Push Live Updates to Active Match
+  const handleSaveLiveEdits = () => {
+    if (!activeMatch || !onUpdateActiveMatch) return;
+    if (!editRoomId.trim() || !editRoomPassword.trim()) {
+      alert('Room ID and Password cannot be empty.');
+      return;
+    }
+
+    const updatedMatch = {
+      ...activeMatch,
+      roomId: editRoomId.trim(),
+      roomPassword: editRoomPassword.trim(),
+      map: editMap
+    };
+
+    onUpdateActiveMatch(updatedMatch);
+    setIsEditingActive(false);
   };
 
   // Open Score Entry Modal
@@ -299,7 +325,7 @@ export default function AdminMatchControl({
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40'
                     : 'bg-slate-800 text-slate-300'
                 }`}>
-                  Status: {activeMatch.status}
+                  Status: {activeMatch.status === 'PUBLISHED' ? 'LIVE PUBLIC LOBBY' : activeMatch.status}
                 </span>
               </div>
               <p className="text-slate-400 text-sm mt-1">
@@ -314,7 +340,7 @@ export default function AdminMatchControl({
                   onClick={onPublishMatch}
                   className="px-5 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm tracking-wide shadow-lg shadow-cyan-500/20 transition flex items-center gap-2"
                 >
-                  <Eye className="w-4 h-4" /> Publish Room & Slots
+                  <Eye className="w-4 h-4" /> 🚀 Push to Match Room (Public)
                 </button>
               )}
 
@@ -333,6 +359,20 @@ export default function AdminMatchControl({
                 </button>
               )}
 
+              <button
+                onClick={() => {
+                  if (!isEditingActive) {
+                    setEditRoomId(activeMatch.roomId);
+                    setEditRoomPassword(activeMatch.roomPassword);
+                    setEditMap(activeMatch.map);
+                  }
+                  setIsEditingActive(!isEditingActive);
+                }}
+                className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs border border-amber-500/30 transition flex items-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" /> {isEditingActive ? 'Close Editor' : 'Edit Credentials'}
+              </button>
+
               {(activeMatch.status === 'LIVE' || activeMatch.status === 'PUBLISHED') && (
                 <button
                   onClick={handleOpenScoreEntry}
@@ -350,6 +390,64 @@ export default function AdminMatchControl({
               </button>
             </div>
           </div>
+
+          {/* Expandable Live Credentials Editor Panel */}
+          {isEditingActive && (
+            <div className="p-6 bg-[#0c1018] rounded-2xl border border-amber-500/30 space-y-4">
+              <h4 className="font-display font-bold text-sm text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                <Key className="w-4 h-4" /> Edit Live Room Info & Push Universally
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Room ID</label>
+                  <input
+                    type="text"
+                    value={editRoomId}
+                    onChange={(e) => setEditRoomId(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#131926] border border-slate-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Room Password</label>
+                  <input
+                    type="text"
+                    value={editRoomPassword}
+                    onChange={(e) => setEditRoomPassword(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#131926] border border-slate-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Battle Map</label>
+                  <select
+                    value={editMap}
+                    onChange={(e) => setEditMap(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#131926] border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400"
+                  >
+                    {BGMI_MAPS.map(m => (
+                      <option key={m.id} value={m.id}>{m.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingActive(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveLiveEdits}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-black font-extrabold text-xs uppercase tracking-wider shadow-md"
+                >
+                  🚀 Push Updates Live to Match Room
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Slot Allocation List */}
           <div className="space-y-4">
@@ -618,14 +716,26 @@ export default function AdminMatchControl({
 
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={selectedTeamsList.length === 0 || !canSetup}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 hover:from-amber-400 hover:to-orange-400 disabled:opacity-50 text-black font-display font-black text-base uppercase tracking-wider transition shadow-xl shadow-amber-500/20"
-          >
-            Create Match Room ({selectedTeamsList.length} Teams Selected)
-          </button>
+          {/* Action Submit Buttons */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={(e) => handleCreateMatchSubmit(e, 'PUBLISHED')}
+              disabled={selectedTeamsList.length === 0 || !canSetup}
+              className="py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 hover:from-emerald-400 hover:to-teal-400 disabled:opacity-50 text-black font-display font-black text-sm uppercase tracking-wider transition shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2"
+            >
+              <Eye className="w-5 h-5" /> 🚀 Create & Push to Match Room ({selectedTeamsList.length} Teams)
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => handleCreateMatchSubmit(e, 'DRAFT')}
+              disabled={selectedTeamsList.length === 0 || !canSetup}
+              className="py-4 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 font-display font-bold text-sm uppercase tracking-wider border border-slate-700 transition flex items-center justify-center gap-2"
+            >
+              💾 Save Draft Match Only
+            </button>
+          </div>
 
         </form>
       )}
