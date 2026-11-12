@@ -49,104 +49,10 @@ export const DEFAULT_MODERATORS = [
   }
 ];
 
-// 30 Sample BGMI Teams
-export const DEFAULT_DEMO_TEAMS = [
-  {
-    id: 'team-101',
-    teamName: 'Apex Predators',
-    leaderName: 'Aarav Sharma',
-    leaderYear: '1st',
-    leaderPhone: '9876543210',
-    leaderBgmiId: '5124893012',
-    leaderIgn: 'APEX_Aarav',
-    members: [
-      { name: 'Rohan Gupta', bgmiId: '5124893013', ign: 'APEX_Rohan' },
-      { name: 'Karan Patel', bgmiId: '5124893014', ign: 'APEX_Karan' },
-      { name: 'Vikram Singh', bgmiId: '5124893015', ign: 'APEX_Vicky' }
-    ],
-    registeredAt: '2026-09-15T10:30:00Z'
-  },
-  {
-    id: 'team-102',
-    teamName: 'Soul Destroyers',
-    leaderName: 'Devansh Verma',
-    leaderYear: '2nd',
-    leaderPhone: '9812345678',
-    leaderBgmiId: '5239847101',
-    leaderIgn: 'SOUL_Dev',
-    members: [
-      { name: 'Arjun Mehta', bgmiId: '5239847102', ign: 'SOUL_Arjun' },
-      { name: 'Sameer Joshi', bgmiId: '5239847103', ign: 'SOUL_Sam' },
-      { name: 'Nikhil Roy', bgmiId: '5239847104', ign: 'SOUL_Nik' }
-    ],
-    registeredAt: '2026-09-15T11:15:00Z'
-  },
-  {
-    id: 'team-103',
-    teamName: 'GodLike Titans',
-    leaderName: 'Kabir Kapoor',
-    leaderYear: '2nd',
-    leaderPhone: '9988776655',
-    leaderBgmiId: '5341209876',
-    leaderIgn: 'GOD_Kabir',
-    members: [
-      { name: 'Pranav Reddy', bgmiId: '5341209877', ign: 'GOD_Pranav' },
-      { name: 'Aditya Nair', bgmiId: '5341209878', ign: 'GOD_Adi' },
-      { name: 'Harsh Vardhan', bgmiId: '5341209879', ign: 'GOD_Harsh' }
-    ],
-    registeredAt: '2026-09-15T14:20:00Z'
-  },
-  {
-    id: 'team-104',
-    teamName: 'Cyber Strikers',
-    leaderName: 'Ananya Deshmukh',
-    leaderYear: '1st',
-    leaderPhone: '9765432109',
-    leaderBgmiId: '5452109843',
-    leaderIgn: 'CYBER_Ana',
-    members: [
-      { name: 'Priya Sharma', bgmiId: '5452109844', ign: 'CYBER_Priya' },
-      { name: 'Sneha Rao', bgmiId: '5452109845', ign: 'CYBER_Sneha' },
-      { name: 'Meera Iyer', bgmiId: '5452109846', ign: 'CYBER_Meera' }
-    ],
-    registeredAt: '2026-09-16T09:00:00Z'
-  },
-  {
-    id: 'team-105',
-    teamName: 'Shadow Esports',
-    leaderName: 'Siddharth Saxena',
-    leaderYear: '2nd',
-    leaderPhone: '9654321098',
-    leaderBgmiId: '5563210954',
-    leaderIgn: 'SHADOW_Sid',
-    members: [
-      { name: 'Varun Sen', bgmiId: '5563210955', ign: 'SHADOW_Varun' },
-      { name: 'Manish Kumar', bgmiId: '5563210956', ign: 'SHADOW_Mani' },
-      { name: 'Yash Agarwal', bgmiId: '5563210957', ign: 'SHADOW_Yash' }
-    ],
-    registeredAt: '2026-09-16T12:45:00Z'
-  },
-  {
-    id: 'team-106',
-    teamName: 'Inferno Elites',
-    leaderName: 'Ishaan Malhotra',
-    leaderYear: '1st',
-    leaderPhone: '9543210987',
-    leaderBgmiId: '5674321065',
-    leaderIgn: 'INF_Ishaan',
-    members: [
-      { name: 'Tushar Bhatt', bgmiId: '5674321066', ign: 'INF_Tushar' },
-      { name: 'Chirag Sethi', bgmiId: '5674321067', ign: 'INF_Chirag' },
-      { name: 'Aman Dubey', bgmiId: '5674321068', ign: 'INF_Aman' }
-    ],
-    registeredAt: '2026-09-16T15:10:00Z'
-  }
-];
+// Default Empty Teams for tournament
+export const DEFAULT_DEMO_TEAMS = [];
 
-export const DEFAULT_ATTENDANCE = DEFAULT_DEMO_TEAMS.reduce((acc, t) => {
-  acc[t.id] = true;
-  return acc;
-}, {});
+export const DEFAULT_ATTENDANCE = {};
 
 export const getDefaultEventDate = () => {
   const d = new Date();
@@ -211,7 +117,7 @@ export async function fetchTeamsCloud() {
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase.from('teams').select('*').order('registered_at', { ascending: false });
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         const formatted = data.map(t => ({
           id: t.id,
           teamName: t.team_name,
@@ -267,7 +173,7 @@ export async function fetchAttendanceCloud() {
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase.from('attendance').select('*');
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         const attObj = {};
         data.forEach(item => {
           attObj[item.team_id] = item.is_present;
@@ -490,19 +396,19 @@ export async function saveStoredModerators(moderators) {
 export function loadStoredTeams() {
   const data = localStorage.getItem(STORAGE_KEYS.TEAMS);
   if (!data) {
-    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(DEFAULT_DEMO_TEAMS));
-    return DEFAULT_DEMO_TEAMS;
+    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify([]));
+    return [];
   }
-  try { return JSON.parse(data); } catch (e) { return DEFAULT_DEMO_TEAMS; }
+  try { return JSON.parse(data); } catch (e) { return []; }
 }
 
 export function loadStoredAttendance() {
   const data = localStorage.getItem(STORAGE_KEYS.ATTENDANCE);
   if (!data) {
-    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(DEFAULT_ATTENDANCE));
-    return DEFAULT_ATTENDANCE;
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify({}));
+    return {};
   }
-  try { return JSON.parse(data); } catch (e) { return DEFAULT_ATTENDANCE; }
+  try { return JSON.parse(data); } catch (e) { return {}; }
 }
 
 export function loadStoredMatches() {
