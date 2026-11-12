@@ -1,71 +1,50 @@
 import fs from 'fs';
 
-// Read .env file directly if process.env is not populated
-let url = process.env.VITE_SUPABASE_URL;
-let key = process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!url || !key) {
-  try {
-    const envContent = fs.readFileSync('.env', 'utf-8');
-    const lines = envContent.split('\n');
-    for (const line of lines) {
-      const match = line.match(/^([^=]+)=(.*)$/);
-      if (match) {
-        const k = match[1].trim();
-        const v = match[2].trim();
-        if (k === 'VITE_SUPABASE_URL') url = v;
-        if (k === 'VITE_SUPABASE_ANON_KEY') key = v;
-      }
-    }
-  } catch (e) {}
-}
-
-const SUPABASE_URL = url || "https://geezacpfyxlcadhluqpe.supabase.co";
-const SUPABASE_ANON_KEY = key || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZXphY3BmeXhsY2FkaGx1cXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyNDUyMjYsImV4cCI6MjEwOTgyMTIyNn0.04qkLCJlVrf6XAFqkM2nbiN5998xgqNiExLxH7hGPfY";
+let url = "https://znbzyslbvmeuheozuyht.supabase.co";
+let key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuYnp5c2xidm1ldWhlb3p1eWh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0Nzk1NzYsImV4cCI6MjExMDA1NTU3Nn0.-NBxbBg5FFrUCaMg5vk2c4ueV4dGipkS08tCzKBrpmU";
 
 async function checkDatabase() {
   console.log("--------------------------------------------------");
-  console.log("Checking Supabase connection to:", SUPABASE_URL);
+  console.log("Checking Supabase connection to:", url);
   console.log("--------------------------------------------------");
 
   const tables = ['teams', 'attendance', 'matches', 'moderators', 'penalties', 'settings'];
-  let connectionSuccess = false;
+  let connectionSuccess = true;
+  let allTablesExist = true;
 
   for (const table of tables) {
     try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=*&limit=1`, {
+      const res = await fetch(`${url}/rest/v1/${table}?select=*&limit=1`, {
         method: "GET",
         headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: key,
+          Authorization: `Bearer ${key}`,
         },
       });
 
       if (res.ok) {
-        connectionSuccess = true;
         const data = await res.json();
         console.log(`✅ Table '${table}': READY (found ${data.length} sample row(s))`);
       } else {
+        allTablesExist = false;
         const err = await res.text();
         console.log(`⚠️ Table '${table}' returned HTTP ${res.status}: ${err}`);
       }
     } catch (err) {
+      connectionSuccess = false;
       console.error(`❌ Network error reaching table '${table}':`, err.message);
       return;
     }
   }
 
-  if (connectionSuccess) {
-    console.log("--------------------------------------------------");
-    console.log("🎉 ALL TABLES VERIFIED! Database is fully operational.");
-    console.log("--------------------------------------------------");
+  console.log("--------------------------------------------------");
+  if (allTablesExist) {
+    console.log("🎉 ALL TABLES VERIFIED! New database is fully connected and ready.");
   } else {
-    console.log("--------------------------------------------------");
-    console.log("ℹ️ Connected to Supabase, but tables might not be created yet.");
-    console.log("Please run the SQL schema in your Supabase SQL editor!");
-    console.log("--------------------------------------------------");
+    console.log("👉 ACTION REQUIRED: Tables do not exist yet in this new Supabase project.");
+    console.log("You must execute supabase_schema.sql in your Supabase SQL Editor!");
   }
+  console.log("--------------------------------------------------");
 }
 
 checkDatabase();
-
