@@ -51,21 +51,23 @@ export default function Navbar({
           
           {/* Brand & Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('home')}>
-            <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-amber-500 p-0.5 shadow-lg shadow-emerald-500/20">
-              <div className="w-full h-full bg-[#0b0e14] rounded-[10px] flex items-center justify-center">
-                <Trophy className="w-6 h-6 text-emerald-400 animate-pulse" />
-              </div>
-            </div>
+            <img
+              src="/logo.jpg"
+              alt="Assult Survivors BGMI Logo"
+              className="w-12 h-12 rounded-xl object-cover border border-amber-500/40 shadow-lg shadow-amber-500/20"
+            />
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-display font-extrabold text-xl tracking-wider text-white">
-                  BGMI <span className="text-emerald-400">CLUB</span>
+                <span className="font-display font-extrabold text-lg sm:text-xl tracking-wider text-white">
+                  ASSULT <span className="text-amber-400">SURVIVORS</span>
                 </span>
-                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">
-                  ESPORTS HUBS
+                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-full">
+                  BGMI
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">Battlegrounds Tournament Portal</p>
+              <p className="text-[11px] text-slate-400 font-medium">
+                Presented by <strong className="text-amber-400">DATA SCIENCE CLUB</strong>
+              </p>
             </div>
           </div>
 

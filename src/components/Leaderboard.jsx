@@ -41,7 +41,7 @@ export default function Leaderboard({ teams = [], matches = [], activeMatch }) {
               🏆 GRAND CHAMPIONS PODIUM 🏆
             </h1>
             <p className="text-slate-300 text-sm max-w-xl mx-auto">
-              The Final Round has concluded! Congratulations to the top performing squads of the BGMI Club Tournament.
+              The Final Round has concluded! Congratulations to the top performing squads of the Assult Survivors BGMI Tournament presented by Data Science Club.
             </p>
           </div>
 

@@ -66,7 +66,7 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-[#121927] to-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl hud-border">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <Sparkles className="w-3.5 h-3.5" /> Club Directory & Roster Stats
+            <Sparkles className="w-3.5 h-3.5" /> Assult Survivors • Data Science Club
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl text-white tracking-wide">
             REGISTERED <span className="text-amber-400">SURVIVAL SQUADS</span>
