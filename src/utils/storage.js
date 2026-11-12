@@ -10,10 +10,13 @@ export const STORAGE_KEYS = {
   MATCHES: 'bgmi_tournament_matches',
   ACTIVE_MATCH: 'bgmi_tournament_active_match',
   EVENT_DATE: 'bgmi_tournament_event_date',
+  EVENT_VENUE: 'bgmi_tournament_event_venue',
   SESSION: 'bgmi_tournament_session',
   MODERATORS: 'bgmi_tournament_moderators',
   PENALTIES: 'bgmi_tournament_penalties'
 };
+
+export const DEFAULT_VENUE = 'Campus Main Auditorium & Esports Arena';
 
 // Default Credentials
 export const PASSWORDS = {
@@ -104,6 +107,40 @@ export async function saveEventDate(eventDateIso) {
       await supabase.from('settings').upsert({
         key: 'event_date',
         value: eventDateIso,
+        updated_at: new Date().toISOString()
+      });
+    } catch (e) {}
+  }
+}
+
+/**
+ * Fetch Event Venue universally
+ */
+export async function fetchEventVenueCloud() {
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase.from('settings').select('*').eq('key', 'event_venue').single();
+      if (!error && data && data.value) {
+        localStorage.setItem(STORAGE_KEYS.EVENT_VENUE, data.value);
+        return data.value;
+      }
+    } catch (e) {}
+  }
+  return localStorage.getItem(STORAGE_KEYS.EVENT_VENUE) || DEFAULT_VENUE;
+}
+
+/**
+ * Save Event Venue universally
+ */
+export async function saveEventVenue(venue) {
+  localStorage.setItem(STORAGE_KEYS.EVENT_VENUE, venue);
+  broadcastLocalChange('EVENT_VENUE_UPDATED');
+
+  if (isSupabaseConfigured) {
+    try {
+      await supabase.from('settings').upsert({
+        key: 'event_venue',
+        value: venue,
         updated_at: new Date().toISOString()
       });
     } catch (e) {}

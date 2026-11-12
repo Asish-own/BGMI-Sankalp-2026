@@ -25,6 +25,10 @@ import {
   savePenalties,
   saveMatchesAndActive,
   saveEventDate,
+  fetchEventVenueCloud,
+  saveEventVenue,
+  DEFAULT_VENUE,
+  STORAGE_KEYS,
   fetchTeamsCloud,
   fetchAttendanceCloud,
   fetchMatchesCloud,
@@ -49,6 +53,7 @@ export default function App() {
   const [moderators, setModerators] = useState(loadStoredModerators);
   const [penalties, setPenalties] = useState(loadStoredPenalties);
   const [eventDateIso, setEventDateIso] = useState(getDefaultEventDate);
+  const [eventVenue, setEventVenue] = useState(() => localStorage.getItem(STORAGE_KEYS.EVENT_VENUE) || DEFAULT_VENUE);
 
   const isUser = session.role === 'user';
   const isAdmin = session.role === 'admin';
@@ -58,13 +63,14 @@ export default function App() {
   // Universal Sync Loader from Supabase Cloud / Local
   const reloadUniversalData = useCallback(async () => {
     try {
-      const [cloudTeams, cloudAttendance, cloudMatchesRes, cloudPenalties, cloudMods, cloudEventDate] = await Promise.all([
+      const [cloudTeams, cloudAttendance, cloudMatchesRes, cloudPenalties, cloudMods, cloudEventDate, cloudVenue] = await Promise.all([
         fetchTeamsCloud(),
         fetchAttendanceCloud(),
         fetchMatchesCloud(),
         fetchPenaltiesCloud(),
         fetchModeratorsCloud(),
-        fetchEventDateCloud()
+        fetchEventDateCloud(),
+        fetchEventVenueCloud()
       ]);
 
       if (cloudTeams) setTeams(cloudTeams);
@@ -76,6 +82,7 @@ export default function App() {
       if (cloudPenalties) setPenalties(cloudPenalties);
       if (cloudMods) setModerators(cloudMods);
       if (cloudEventDate) setEventDateIso(cloudEventDate);
+      if (cloudVenue) setEventVenue(cloudVenue);
     } catch (e) {
       console.warn('Data sync reload error:', e);
     }
@@ -110,9 +117,15 @@ export default function App() {
   }, []);
 
   // Handlers with Universal Cloud Sync
-  const handleUpdateEventDate = async (newDateIso) => {
-    setEventDateIso(newDateIso);
-    await saveEventDate(newDateIso);
+  const handleUpdateEventConfig = async (newDateIso, newVenue) => {
+    if (newDateIso) {
+      setEventDateIso(newDateIso);
+      await saveEventDate(newDateIso);
+    }
+    if (newVenue) {
+      setEventVenue(newVenue);
+      await saveEventVenue(newVenue);
+    }
   };
 
   const handleUpdateModerators = async (updatedMods) => {
@@ -255,7 +268,12 @@ export default function App() {
               teamsCount={teams.length}
             />
             <div className="px-4 sm:px-6 lg:px-8">
-              <EventCountdown eventDateIso={eventDateIso} />
+              <EventCountdown
+                eventDateIso={eventDateIso}
+                eventVenue={eventVenue}
+                isAdmin={isAdmin}
+                onUpdateEventConfig={handleUpdateEventConfig}
+              />
             </div>
           </div>
         )}
