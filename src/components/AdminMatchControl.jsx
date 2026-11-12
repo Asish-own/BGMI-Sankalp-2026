@@ -470,7 +470,7 @@ export default function AdminMatchControl({
                     </div>
                     <div>
                       <div className="font-bold text-white text-sm">{pt.teamName}</div>
-                      <div className="text-xs text-slate-400">Leader: <strong className="text-slate-300">{pt.leaderName}</strong> ({pt.leaderYear} Year)</div>
+                      <div className="text-xs text-slate-400">Leader: <strong className="text-slate-300">{pt.leaderName}</strong> ({pt.leaderYear.includes('Year') ? pt.leaderYear : `${pt.leaderYear} Year`})</div>
                     </div>
                   </div>
                   <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-400">

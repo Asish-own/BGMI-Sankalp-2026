@@ -247,12 +247,17 @@ export default function App() {
       {/* Main Content Body */}
       <main className="flex-grow px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === 'home' && (
-          <EsportsLandingHero
-            onRegisterClick={() => setActiveTab('register')}
-            onViewStandingsClick={() => setActiveTab('leaderboard')}
-            activeMatch={activeMatch}
-            teamsCount={teams.length}
-          />
+          <div className="space-y-12 max-w-7xl mx-auto">
+            <EsportsLandingHero
+              onRegisterClick={() => setActiveTab('register')}
+              onViewStandingsClick={() => setActiveTab('leaderboard')}
+              activeMatch={activeMatch}
+              teamsCount={teams.length}
+            />
+            <div className="px-4 sm:px-6 lg:px-8">
+              <EventCountdown eventDateIso={eventDateIso} />
+            </div>
+          </div>
         )}
 
         {activeTab === 'register' && (
@@ -266,18 +271,14 @@ export default function App() {
           <TeamsOverview
             session={session}
             teams={teams}
+            attendance={attendance}
             onUpdateTeam={handleUpdateTeam}
             onNavigateToRegister={() => setActiveTab('register')}
           />
         )}
 
         {activeTab === 'event' && (
-          <div className="space-y-8">
-            <EventCountdown
-              eventDateIso={eventDateIso}
-              onUpdateEventDate={handleUpdateEventDate}
-            />
-
+          <div className="space-y-8 max-w-7xl mx-auto">
             {/* Attendance checklist rendered ONLY for Staff (Admin/Moderators with verifyTeams permission) */}
             {canVerifyAttendance ? (
               <ModeratorAttendance

@@ -122,10 +122,11 @@ export async function fetchTeamsCloud() {
           id: t.id,
           teamName: t.team_name,
           leaderName: t.leader_name,
+          leaderStream: t.leader_stream || '',
           leaderYear: t.leader_year,
           leaderPhone: t.leader_phone,
           leaderBgmiId: t.leader_bgmi_id,
-          leaderIgn: t.leader_ign,
+          leaderIgn: t.leader_ign || t.leader_bgmi_id,
           members: t.members || [],
           registeredAt: t.registered_at
         }));
@@ -152,10 +153,11 @@ export async function saveTeams(teams) {
         id: t.id,
         team_name: t.teamName,
         leader_name: t.leaderName,
+        leader_stream: t.leaderStream || null,
         leader_year: t.leaderYear,
         leader_phone: t.leaderPhone,
         leader_bgmi_id: t.leaderBgmiId,
-        leader_ign: t.leaderIgn,
+        leader_ign: t.leaderIgn || t.leaderBgmiId,
         members: t.members || [],
         registered_at: t.registeredAt || new Date().toISOString()
       }));

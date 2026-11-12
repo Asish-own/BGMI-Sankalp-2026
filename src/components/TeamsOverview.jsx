@@ -1,35 +1,51 @@
 import React, { useState } from 'react';
-import { Users, Search, Phone, Hash, Shield, GraduationCap, ChevronDown, ChevronUp, UserCheck, Sparkles, Filter, Edit, Save } from 'lucide-react';
+import { Users, Search, Phone, Hash, Shield, GraduationCap, ChevronDown, ChevronUp, UserCheck, Sparkles, Filter, Edit, BookOpen, CheckCircle, XCircle } from 'lucide-react';
 
-export default function TeamsOverview({ session = { role: 'user' }, teams = [], onUpdateTeam, onNavigateToRegister }) {
+const ACADEMIC_YEARS = ['ALL', '1st Year', '2nd Year', '3rd Year', '4th Year'];
+const STREAMS = ['ALL', 'BTECH', 'BSC', 'BCA', 'Others'];
+
+export default function TeamsOverview({ session = { role: 'user' }, teams = [], attendance = {}, onUpdateTeam, onNavigateToRegister }) {
   const isAdmin = session.role === 'admin';
   const canEdit = isAdmin || (session.role === 'moderator' && session.moderatorObj?.permissions?.editTeams);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState('ALL');
+  const [streamFilter, setStreamFilter] = useState('ALL');
+  const [attendanceFilter, setAttendanceFilter] = useState('ALL'); // 'ALL', 'PRESENT', 'ABSENT'
   const [expandedTeamId, setExpandedTeamId] = useState(null);
 
   // Edit Team Modal State
   const [editingTeam, setEditingTeam] = useState(null);
 
-  // Compute Statistics
+  // Compute Statistics: Total Registered Teams & Total Attended Teams
   const totalTeams = teams.length;
-  const firstYearCount = teams.filter(t => t.leaderYear === '1st').length;
-  const secondYearCount = teams.filter(t => t.leaderYear === '2nd').length;
+  const attendedCount = teams.filter(t => attendance[t.id] === true).length;
   const totalPlayers = totalTeams * 4;
-
-  const firstYearPercent = totalTeams > 0 ? Math.round((firstYearCount / totalTeams) * 100) : 0;
-  const secondYearPercent = totalTeams > 0 ? Math.round((secondYearCount / totalTeams) * 100) : 0;
+  const attendancePercent = totalTeams > 0 ? Math.round((attendedCount / totalTeams) * 100) : 0;
 
   // Filtered Teams List
   const filteredTeams = teams.filter(t => {
     const matchesSearch = 
       t.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.leaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (t.leaderIgn && t.leaderIgn.toLowerCase().includes(searchTerm.toLowerCase()));
+      (t.leaderBgmiId && t.leaderBgmiId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (t.leaderStream && t.leaderStream.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesYear = yearFilter === 'ALL' || t.leaderYear === yearFilter;
-    return matchesSearch && matchesYear;
+    
+    const matchesStream = streamFilter === 'ALL' || (
+      streamFilter === 'Others'
+        ? !['BTECH', 'BSC', 'BCA'].includes((t.leaderStream || '').toUpperCase())
+        : (t.leaderStream || '').toUpperCase() === streamFilter
+    );
+
+    const isPresent = Boolean(attendance[t.id]);
+    const matchesAttendance = 
+      attendanceFilter === 'ALL' ||
+      (attendanceFilter === 'PRESENT' && isPresent) ||
+      (attendanceFilter === 'ABSENT' && !isPresent);
+
+    return matchesSearch && matchesYear && matchesStream && matchesAttendance;
   });
 
   const toggleExpand = (teamId) => {
@@ -56,7 +72,7 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
             REGISTERED <span className="text-amber-400">SURVIVAL SQUADS</span>
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Real-time year-wise registration stats and full 4-player squad rosters.
+            Real-time registration statistics, event day attendance, and 4-player squad rosters.
           </p>
         </div>
 
@@ -68,10 +84,10 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
         </button>
       </div>
 
-      {/* Analytics Counter Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Analytics Counter Cards: Total Teams & Total Attended Teams */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         
-        {/* Total Teams Card */}
+        {/* Total Registered Teams Card */}
         <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative overflow-hidden group hover:border-amber-500/40 transition">
           <div className="absolute right-3 top-3 w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400">
             <Shield className="w-6 h-6" />
@@ -80,99 +96,135 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
           <div className="font-display font-black text-4xl text-white mt-3 group-hover:text-amber-400 transition">
             {totalTeams}
           </div>
-          <div className="text-xs text-slate-500 mt-2 font-medium">Ready for tournament matches</div>
+          <div className="text-xs text-slate-500 mt-2 font-medium">All registered tournament squads</div>
         </div>
 
-        {/* 1st Year Leaders Card */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative overflow-hidden group hover:border-cyan-500/40 transition">
-          <div className="absolute right-3 top-3 w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-            <GraduationCap className="w-6 h-6" />
-          </div>
-          <div className="text-xs font-bold uppercase text-slate-400 tracking-wider">1st Year Leader Teams</div>
-          <div className="font-display font-black text-4xl text-cyan-400 mt-3">
-            {firstYearCount} <span className="text-sm text-slate-500 font-normal">({firstYearPercent}%)</span>
-          </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div className="bg-cyan-400 h-full rounded-full transition-all duration-500" style={{ width: `${firstYearPercent}%` }}></div>
-          </div>
-        </div>
-
-        {/* 2nd Year Leaders Card */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative overflow-hidden group hover:border-orange-500/40 transition">
-          <div className="absolute right-3 top-3 w-12 h-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+        {/* Total Teams Attended / Present on Event Day Card */}
+        <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative overflow-hidden group hover:border-emerald-500/40 transition">
+          <div className="absolute right-3 top-3 w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
             <UserCheck className="w-6 h-6" />
           </div>
-          <div className="text-xs font-bold uppercase text-slate-400 tracking-wider">2nd Year Leader Teams</div>
-          <div className="font-display font-black text-4xl text-orange-400 mt-3">
-            {secondYearCount} <span className="text-sm text-slate-500 font-normal">({secondYearPercent}%)</span>
+          <div className="text-xs font-bold uppercase text-slate-400 tracking-wider">Teams Present on Event Day</div>
+          <div className="font-display font-black text-4xl text-emerald-400 mt-3 flex items-baseline gap-2">
+            {attendedCount} <span className="text-lg text-slate-500 font-bold">/ {totalTeams}</span>
           </div>
           <div className="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
-            <div className="bg-orange-400 h-full rounded-full transition-all duration-500" style={{ width: `${secondYearPercent}%` }}></div>
+            <div className="bg-emerald-400 h-full rounded-full transition-all duration-500" style={{ width: `${attendancePercent}%` }}></div>
           </div>
+          <div className="text-xs text-slate-500 mt-2 font-medium">{attendancePercent}% verified attendance</div>
         </div>
 
         {/* Total Players Card */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative overflow-hidden group hover:border-emerald-500/40 transition">
-          <div className="absolute right-3 top-3 w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+        <div className="glass-panel p-6 rounded-3xl border border-slate-800 relative overflow-hidden group hover:border-cyan-500/40 transition">
+          <div className="absolute right-3 top-3 w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-400">
             <Users className="w-6 h-6" />
           </div>
-          <div className="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Active Players</div>
-          <div className="font-display font-black text-4xl text-emerald-400 mt-3">
+          <div className="text-xs font-bold uppercase text-slate-400 tracking-wider">Total Active Squad Players</div>
+          <div className="font-display font-black text-4xl text-cyan-400 mt-3">
             {totalPlayers}
           </div>
-          <div className="text-xs text-slate-500 mt-2 font-medium">4 Players per Squad</div>
+          <div className="text-xs text-slate-500 mt-2 font-medium">4 Players per Registered Squad</div>
         </div>
 
       </div>
 
-      {/* Search & Year Filter Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#111723] p-4 rounded-2xl border border-slate-800">
-        
-        {/* Search Bar */}
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Search by team or leader name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-[#0b0e14] border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition"
-          />
+      {/* Filter and Search Controls */}
+      <div className="bg-[#111723] p-4 rounded-2xl border border-slate-800 space-y-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search by team, leader, or BGMI ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-[#0b0e14] border border-slate-700/80 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition"
+            />
+          </div>
+
+          {/* Attendance Filter Tabs */}
+          <div className="flex items-center gap-1 bg-[#0b0e14] p-1 rounded-xl border border-slate-800">
+            {[
+              { id: 'ALL', label: 'All Teams' },
+              { id: 'PRESENT', label: 'Present Today' },
+              { id: 'ABSENT', label: 'Pending / Absent' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setAttendanceFilter(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  attendanceFilter === tab.id
+                    ? 'bg-amber-500 text-black shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
         </div>
 
-        {/* Year Filter Buttons */}
-        <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" /> Year:
-          </span>
-          {['ALL', '1st', '2nd'].map((year) => (
-            <button
-              key={year}
-              onClick={() => setYearFilter(year)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition ${
-                yearFilter === year
-                  ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
-                  : 'bg-[#0b0e14] text-slate-400 hover:text-white border border-slate-800'
-              }`}
-            >
-              {year === 'ALL' ? 'All Years' : `${year} Year`}
-            </button>
-          ))}
-        </div>
+        {/* Secondary Filter: Academic Year & Stream */}
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800/80 text-xs">
+          <div className="flex items-center gap-1.5">
+            <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-bold text-slate-400">Year:</span>
+            <div className="flex gap-1 overflow-x-auto">
+              {ACADEMIC_YEARS.map(yr => (
+                <button
+                  key={yr}
+                  onClick={() => setYearFilter(yr)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
+                    yearFilter === yr
+                      ? 'bg-amber-500 text-black font-bold'
+                      : 'bg-[#0b0e14] text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  {yr}
+                </button>
+              ))}
+            </div>
+          </div>
 
+          <div className="flex items-center gap-1.5 ml-auto">
+            <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="font-bold text-slate-400">Stream:</span>
+            <div className="flex gap-1 overflow-x-auto">
+              {STREAMS.map(st => (
+                <button
+                  key={st}
+                  onClick={() => setStreamFilter(st)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition ${
+                    streamFilter === st
+                      ? 'bg-cyan-500 text-black font-bold'
+                      : 'bg-[#0b0e14] text-slate-400 hover:text-white border border-slate-800'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Teams Grid */}
+      {/* Squad Cards Grid */}
       {filteredTeams.length === 0 ? (
         <div className="text-center py-16 glass-panel rounded-3xl border border-slate-800">
           <Shield className="w-12 h-12 text-slate-600 mx-auto mb-3" />
           <h3 className="font-display font-bold text-xl text-white">No Teams Found</h3>
-          <p className="text-slate-400 text-sm mt-1">Try adjusting your search query or filter.</p>
+          <p className="text-slate-400 text-sm mt-1">
+            {teams.length === 0 ? 'No squads have registered yet. Be the first to register!' : 'Try adjusting your search query or filter.'}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTeams.map((team) => {
             const isExpanded = expandedTeamId === team.id;
+            const isPresent = Boolean(attendance[team.id]);
             return (
               <div
                 key={team.id}
@@ -186,13 +238,23 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
                 <div className="p-6 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-full border ${
-                          team.leaderYear === '1st'
-                            ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
-                            : 'bg-orange-500/10 text-orange-400 border-orange-500/30'
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                        {/* Stream Badge */}
+                        <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                          {team.leaderStream || 'General'}
+                        </span>
+                        {/* Academic Year Badge */}
+                        <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                          {team.leaderYear}
+                        </span>
+                        {/* Attendance Status Badge */}
+                        <span className={`px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-full flex items-center gap-1 ${
+                          isPresent
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                            : 'bg-slate-800 text-slate-400 border border-slate-700'
                         }`}>
-                          {team.leaderYear} Year Leader
+                          {isPresent ? <CheckCircle className="w-2.5 h-2.5" /> : <XCircle className="w-2.5 h-2.5" />}
+                          {isPresent ? 'Present' : 'Not Checked'}
                         </span>
                       </div>
                       <h3 className="font-display font-black text-xl text-white tracking-wide">
@@ -227,8 +289,8 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
                       <span className="font-mono text-slate-200">{team.leaderPhone}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-400">
-                      <span className="flex items-center gap-1"><Hash className="w-3 h-3 text-slate-500" /> BGMI ID / IGN:</span>
-                      <span className="font-mono text-amber-400 font-bold">{team.leaderBgmiId} ({team.leaderIgn || 'N/A'})</span>
+                      <span className="flex items-center gap-1"><Hash className="w-3 h-3 text-slate-500" /> Leader BGMI ID:</span>
+                      <span className="font-mono text-amber-400 font-bold">{team.leaderBgmiId}</span>
                     </div>
                   </div>
 
@@ -252,20 +314,20 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
                     {/* Leader */}
                     <div className="p-3 bg-[#131926] rounded-xl border border-amber-500/30 flex items-center justify-between text-xs">
                       <div>
-                        <span className="font-bold text-amber-400">👑 {team.leaderName}</span>
-                        <div className="text-[10px] text-slate-400">Team Leader • {team.leaderYear} Year</div>
+                        <span className="font-bold text-amber-400">👑 {team.leaderName} (Leader)</span>
+                        <div className="text-[10px] text-slate-400">{team.leaderStream || 'General'} • {team.leaderYear}</div>
                       </div>
-                      <div className="text-right font-mono text-[11px] text-amber-300">
+                      <div className="text-right font-mono text-[11px] text-amber-300 font-bold">
                         {team.leaderBgmiId}
                       </div>
                     </div>
 
-                    {/* Member 2, 3, 4 */}
-                    {team.members.map((m, idx) => (
+                    {/* Other 3 Squad Members */}
+                    {(team.members || []).map((m, idx) => (
                       <div key={idx} className="p-3 bg-[#131926] rounded-xl border border-slate-800/80 flex items-center justify-between text-xs">
                         <div>
                           <span className="font-semibold text-white">Player {idx + 2}: {m.name}</span>
-                          <div className="text-[10px] text-slate-400">IGN: {m.ign || m.name}</div>
+                          <div className="text-[10px] text-slate-400">Squad Player</div>
                         </div>
                         <div className="text-right font-mono text-[11px] text-slate-300">
                           {m.bgmiId}
@@ -310,6 +372,30 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
                   className="w-full px-3 py-2 bg-[#0c1018] border border-slate-700 rounded-xl text-white"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-300 block mb-1">Stream / Course</label>
+                <input
+                  type="text"
+                  value={editingTeam.leaderStream || ''}
+                  onChange={(e) => setEditingTeam({ ...editingTeam, leaderStream: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0c1018] border border-slate-700 rounded-xl text-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-300 block mb-1">Academic Year</label>
+                <select
+                  value={editingTeam.leaderYear || '1st Year'}
+                  onChange={(e) => setEditingTeam({ ...editingTeam, leaderYear: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#0c1018] border border-slate-700 rounded-xl text-white"
+                >
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
               </div>
 
               <div>

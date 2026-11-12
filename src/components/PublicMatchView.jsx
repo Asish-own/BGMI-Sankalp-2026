@@ -235,7 +235,7 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
                       {pt.teamName}
                     </div>
                     <div className="text-xs text-slate-400">
-                      Leader: <strong className="text-amber-300">{pt.leaderName}</strong> ({pt.leaderYear} Year)
+                      Leader: <strong className="text-amber-300">{pt.leaderName}</strong> ({pt.leaderYear.includes('Year') ? pt.leaderYear : `${pt.leaderYear} Year`})
                     </div>
                   </div>
                 </div>

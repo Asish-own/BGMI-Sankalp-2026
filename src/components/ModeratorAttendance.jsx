@@ -122,15 +122,16 @@ export default function ModeratorAttendance({ teams = [], attendance = {}, onTog
                         </div>
                       </td>
 
-                      {/* Year */}
+                      {/* Stream & Year */}
                       <td className="py-4 px-6">
-                        <span className={`px-2.5 py-0.5 text-[10px] font-extrabold rounded-full ${
-                          team.leaderYear === '1st' 
-                            ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' 
-                            : 'bg-orange-500/10 text-orange-400 border border-orange-500/30'
-                        }`}>
-                          {team.leaderYear} Year
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 w-fit">
+                            {team.leaderStream || 'General'}
+                          </span>
+                          <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 w-fit">
+                            {team.leaderYear.includes('Year') ? team.leaderYear : `${team.leaderYear} Year`}
+                          </span>
+                        </div>
                       </td>
 
                       {/* Team Name */}

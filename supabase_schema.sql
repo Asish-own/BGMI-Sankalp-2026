@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS teams (
   id TEXT PRIMARY KEY,
   team_name TEXT NOT NULL,
   leader_name TEXT NOT NULL,
+  leader_stream TEXT,
   leader_year TEXT NOT NULL,
   leader_phone TEXT NOT NULL,
   leader_bgmi_id TEXT NOT NULL,
