@@ -281,11 +281,12 @@ export default function App() {
                 isSiteReady={isSiteReady}
               />
             </div>
-            {isSiteReady && (
-              <div className="px-1 sm:px-4 lg:px-6 animate-cyber-reveal">
-                <AboutEventOrganizer />
-              </div>
-            )}
+          </div>
+        )}
+
+        {activeTab === 'about' && (
+          <div className="space-y-8 max-w-7xl mx-auto py-2">
+            <AboutEventOrganizer onRegisterClick={() => setActiveTab('register')} />
           </div>
         )}
 
@@ -424,6 +425,7 @@ export default function App() {
               <li><button onClick={() => setActiveTab('event')} className="hover:text-amber-400 transition">Event Day Verification</button></li>
               <li><button onClick={() => setActiveTab('public-match')} className="hover:text-amber-400 transition">Match Room & Slots</button></li>
               <li><button onClick={() => setActiveTab('leaderboard')} className="hover:text-amber-400 transition">Official Leaderboard</button></li>
+              <li><button onClick={() => setActiveTab('about')} className="hover:text-amber-400 transition">About Us (Organizer & Fest)</button></li>
             </ul>
           </div>
 

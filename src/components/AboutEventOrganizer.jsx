@@ -1,7 +1,7 @@
 import React from 'react';
 import { Shield, Sparkles, ExternalLink, Trophy, Users, MapPin, Mail, Award, Flame, BookOpen } from 'lucide-react';
 
-export default function AboutEventOrganizer() {
+export default function AboutEventOrganizer({ onRegisterClick }) {
   return (
     <section className="relative overflow-hidden glass-panel rounded-3xl border border-amber-500/30 p-6 sm:p-10 shadow-2xl hud-border w-full select-none">
       {/* Ambient background glow */}
@@ -179,6 +179,22 @@ export default function AboutEventOrganizer() {
             </div>
           </div>
         </div>
+
+        {/* Call to action footer */}
+        {onRegisterClick && (
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
+            <div>
+              <div className="font-display font-black text-base sm:text-lg text-white">READY TO COMPETE IN SANKALP 2026?</div>
+              <p className="text-slate-400 text-xs">Register your 4-player squad for Assult Survivors BGMI Tournament.</p>
+            </div>
+            <button
+              onClick={onRegisterClick}
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-display font-black text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/25 active:scale-95 text-center"
+            >
+              Register Squad Now →
+            </button>
+          </div>
+        )}
 
       </div>
     </section>
