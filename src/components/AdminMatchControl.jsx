@@ -673,7 +673,10 @@ export default function AdminMatchControl({
                           <Square className="w-5 h-5 text-slate-600 flex-shrink-0" />
                         )}
                         <div>
-                          <div className="font-bold text-white text-sm">{team.teamName}</div>
+                          <div className="font-bold text-white text-sm flex items-center gap-2">
+                            <span>{team.teamName}</span>
+                            <span className="text-[10px] font-mono text-amber-400 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">{team.id}</span>
+                          </div>
                           <div className="text-[10px] text-slate-400">Leader: {team.leaderName}</div>
                         </div>
                       </div>

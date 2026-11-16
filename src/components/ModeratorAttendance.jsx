@@ -135,8 +135,9 @@ export default function ModeratorAttendance({ teams = [], attendance = {}, onTog
                       </td>
 
                       {/* Team Name */}
-                      <td className="py-4 px-6 font-display font-extrabold text-amber-400">
-                        {team.teamName}
+                      <td className="py-4 px-6">
+                        <div className="font-display font-extrabold text-amber-400">{team.teamName}</div>
+                        <div className="text-[11px] font-mono font-bold text-amber-500/80">{team.id}</div>
                       </td>
 
                       {/* Phone & BGMI ID */}

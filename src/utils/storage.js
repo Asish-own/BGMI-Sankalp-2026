@@ -148,12 +148,40 @@ export async function saveEventVenue(venue) {
 }
 
 /**
+ * Generate sequential team ID starting from BGMI-001
+ * e.g. BGMI-001, BGMI-002, ..., BGMI-025, BGMI-100
+ */
+export function generateNextTeamId(existingTeams = []) {
+  let maxNum = 0;
+  if (Array.isArray(existingTeams)) {
+    existingTeams.forEach(t => {
+      if (!t || !t.id) return;
+      const match = String(t.id).match(/BGMI-(\d+)/i);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (!isNaN(num) && num > maxNum) {
+          maxNum = num;
+        }
+      }
+    });
+
+    // If no BGMI-### pattern found yet, fallback to array length
+    if (maxNum === 0 && existingTeams.length > 0) {
+      maxNum = existingTeams.length;
+    }
+  }
+
+  const nextNum = maxNum + 1;
+  return `BGMI-${String(nextNum).padStart(3, '0')}`;
+}
+
+/**
  * Fetch all teams from Supabase Cloud or LocalStorage
  */
 export async function fetchTeamsCloud() {
   if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase.from('teams').select('*').order('registered_at', { ascending: false });
+      const { data, error } = await supabase.from('teams').select('*').order('registered_at', { ascending: true });
       if (!error && data) {
         const formatted = data.map(t => ({
           id: t.id,

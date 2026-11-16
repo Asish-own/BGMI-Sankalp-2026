@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { User, Phone, Hash, Shield, Users, CheckCircle, AlertCircle, Sparkles, GraduationCap, BookOpen } from 'lucide-react';
+import { generateNextTeamId } from '../utils/storage';
 
 const STREAMS = ['BTECH', 'BSC', 'BCA', 'Others'];
 const ACADEMIC_YEARS = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
 
-export default function RegistrationForm({ onAddTeam, onViewTeams }) {
+export default function RegistrationForm({ onAddTeam, onViewTeams, teams = [] }) {
   const [teamName, setTeamName] = useState('');
   
   // Leader details
@@ -24,6 +25,7 @@ export default function RegistrationForm({ onAddTeam, onViewTeams }) {
 
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [registeredTeamId, setRegisteredTeamId] = useState('');
 
   const handleMemberChange = (index, field, value) => {
     const updated = [...members];
@@ -74,9 +76,10 @@ export default function RegistrationForm({ onAddTeam, onViewTeams }) {
     }
 
     const finalStream = leaderStream === 'Others' ? customStream.trim() : leaderStream;
+    const nextSerialId = generateNextTeamId(teams);
 
     const newTeam = {
-      id: 'team-' + Date.now(),
+      id: nextSerialId,
       teamName: teamName.trim(),
       leaderName: leaderName.trim(),
       leaderStream: finalStream,
@@ -93,6 +96,7 @@ export default function RegistrationForm({ onAddTeam, onViewTeams }) {
     };
 
     onAddTeam(newTeam);
+    setRegisteredTeamId(nextSerialId);
     setSubmitted(true);
   };
 
@@ -109,6 +113,7 @@ export default function RegistrationForm({ onAddTeam, onViewTeams }) {
       { name: '', bgmiId: '' },
       { name: '', bgmiId: '' }
     ]);
+    setRegisteredTeamId('');
     setSubmitted(false);
     setError('');
   };
@@ -123,8 +128,15 @@ export default function RegistrationForm({ onAddTeam, onViewTeams }) {
         <h2 className="font-display font-extrabold text-3xl text-white mb-2 tracking-wide">
           REGISTRATION CONFIRMED! 🎮
         </h2>
+        
+        {/* Assigned Serial / Team ID Badge */}
+        <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-display font-black text-xl tracking-wider my-3 shadow-lg shadow-amber-500/10">
+          <span className="text-xs uppercase text-amber-400 font-mono font-bold tracking-widest">OFFICIAL TEAM ID:</span>
+          <span className="text-white text-2xl font-black">{registeredTeamId}</span>
+        </div>
+
         <p className="text-slate-300 mb-2 text-base max-w-md mx-auto">
-          Team <span className="text-amber-400 font-bold">{teamName}</span> has been successfully registered!
+          Team <span className="text-amber-400 font-bold">{teamName}</span> has been officially enrolled with serial number <strong className="text-white">{registeredTeamId}</strong>!
         </p>
         <p className="text-slate-400 text-xs mb-6">
           Leader: <strong className="text-white">{leaderName}</strong> ({finalStream} - {leaderYear})

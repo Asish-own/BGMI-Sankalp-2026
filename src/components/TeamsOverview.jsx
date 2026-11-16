@@ -26,6 +26,7 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
   // Filtered Teams List
   const filteredTeams = teams.filter(t => {
     const matchesSearch = 
+      (t.id && t.id.toLowerCase().includes(searchTerm.toLowerCase())) ||
       t.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.leaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.leaderBgmiId && t.leaderBgmiId.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -272,8 +273,8 @@ export default function TeamsOverview({ session = { role: 'user' }, teams = [], 
                           <Edit className="w-4 h-4" />
                         </button>
                       )}
-                      <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center font-display font-bold text-amber-400">
-                        #{team.id.replace('team-', '')}
+                      <div className="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center font-display font-black text-xs sm:text-sm text-amber-400 tracking-wider shadow-sm">
+                        {team.id}
                       </div>
                     </div>
                   </div>

@@ -231,8 +231,11 @@ export default function PublicMatchView({ activeMatch, onStartMatch }) {
                     #{pt.slotNumber}
                   </div>
                   <div>
-                    <div className="font-display font-extrabold text-white text-base group-hover:text-amber-400 transition">
-                      {pt.teamName}
+                    <div className="font-display font-extrabold text-white text-base group-hover:text-amber-400 transition flex items-center gap-2">
+                      <span>{pt.teamName}</span>
+                      <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
+                        {pt.teamId}
+                      </span>
                     </div>
                     <div className="text-xs text-slate-400">
                       Leader: <strong className="text-amber-300">{pt.leaderName}</strong> ({pt.leaderYear.includes('Year') ? pt.leaderYear : `${pt.leaderYear} Year`})

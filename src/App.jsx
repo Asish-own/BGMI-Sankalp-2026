@@ -39,7 +39,8 @@ import {
   fetchEventDateCloud,
   subscribeToRealtimeSync,
   getDefaultEventDate,
-  DEFAULT_PERMISSIONS
+  DEFAULT_PERMISSIONS,
+  generateNextTeamId
 } from './utils/storage';
 import { isVideoInMemory } from './utils/videoCache';
 
@@ -138,9 +139,15 @@ export default function App() {
   };
 
   const handleAddTeam = async (newTeam) => {
-    const updated = [newTeam, ...teams];
+    // Ensure serial ID starts from BGMI-001 and continues serially
+    const assignedId = newTeam.id && String(newTeam.id).startsWith('BGMI-')
+      ? newTeam.id
+      : generateNextTeamId(teams);
+
+    const finalTeam = { ...newTeam, id: assignedId };
+    const updated = [finalTeam, ...teams];
     setTeams(updated);
-    const updatedAttendance = { ...attendance, [newTeam.id]: true };
+    const updatedAttendance = { ...attendance, [finalTeam.id]: true };
     setAttendance(updatedAttendance);
     
     await saveTeams(updated);
@@ -294,6 +301,7 @@ export default function App() {
           <RegistrationForm
             onAddTeam={handleAddTeam}
             onViewTeams={() => setActiveTab('teams')}
+            teams={teams}
           />
         )}
 
