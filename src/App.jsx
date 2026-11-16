@@ -39,6 +39,7 @@ import {
   getDefaultEventDate,
   DEFAULT_PERMISSIONS
 } from './utils/storage';
+import { isVideoInMemory } from './utils/videoCache';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -54,6 +55,7 @@ export default function App() {
   const [penalties, setPenalties] = useState(loadStoredPenalties);
   const [eventDateIso, setEventDateIso] = useState(getDefaultEventDate);
   const [eventVenue, setEventVenue] = useState(() => localStorage.getItem(STORAGE_KEYS.EVENT_VENUE) || DEFAULT_VENUE);
+  const [isSiteReady, setIsSiteReady] = useState(() => isVideoInMemory());
 
   const isUser = session.role === 'user';
   const isAdmin = session.role === 'admin';
@@ -266,6 +268,7 @@ export default function App() {
               onViewStandingsClick={() => setActiveTab('leaderboard')}
               activeMatch={activeMatch}
               teamsCount={teams.length}
+              onVideoReady={() => setIsSiteReady(true)}
             />
             <div className="px-1 sm:px-4 lg:px-6">
               <EventCountdown
@@ -273,6 +276,7 @@ export default function App() {
                 eventVenue={eventVenue}
                 isAdmin={isAdmin}
                 onUpdateEventConfig={handleUpdateEventConfig}
+                isSiteReady={isSiteReady}
               />
             </div>
           </div>

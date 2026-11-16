@@ -6,7 +6,8 @@ export default function EventCountdown({
   eventDateIso,
   eventVenue = DEFAULT_VENUE,
   isAdmin = false,
-  onUpdateEventConfig
+  onUpdateEventConfig,
+  isSiteReady = true
 }) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -84,8 +85,33 @@ export default function EventCountdown({
     minute: '2-digit'
   });
 
+  // Stage 1 Skeleton: displayed while video is buffering
+  if (!isSiteReady) {
+    return (
+      <div className="relative overflow-hidden glass-panel p-4 sm:p-10 rounded-2xl sm:rounded-3xl border border-amber-500/30 shadow-2xl hud-border w-full animate-pulse select-none">
+        <div className="relative z-10 text-center space-y-5 sm:space-y-6">
+          <div className="flex justify-center">
+            <div className="h-6 w-56 rounded-full bg-slate-800/80 animate-tactical-shimmer border border-amber-500/20"></div>
+          </div>
+          <div className="h-8 sm:h-10 w-64 sm:w-80 mx-auto rounded-xl bg-slate-800/80 animate-tactical-shimmer"></div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 max-w-3xl mx-auto pt-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-[#0b0e14]/90 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-800/80 shadow-inner flex flex-col items-center justify-center space-y-2">
+                <div className="h-10 sm:h-12 w-16 bg-slate-800/90 rounded-xl animate-tactical-shimmer"></div>
+                <div className="h-3 w-12 bg-slate-800/60 rounded"></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="h-4 w-72 sm:w-96 mx-auto rounded bg-slate-800/60 animate-tactical-shimmer pt-2"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative overflow-hidden glass-panel p-4 sm:p-10 rounded-2xl sm:rounded-3xl border border-amber-500/40 shadow-2xl hud-border w-full">
+    <div className="relative overflow-hidden glass-panel p-4 sm:p-10 rounded-2xl sm:rounded-3xl border border-amber-500/40 shadow-2xl hud-border w-full animate-cyber-reveal">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 

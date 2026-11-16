@@ -118,6 +118,55 @@ body {
   animation-play-state: paused;
 }
 
+/* Tactical Skeleton & Scanline Animations */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(400%);
+  }
+}
+
+.animate-scanline {
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes tacticalShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-tactical-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(245, 158, 11, 0.08) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  background-size: 200% 100%;
+  animation: tacticalShimmer 2s infinite linear;
+}
+
+@keyframes cyberReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-cyber-reveal {
+  animation: cyberReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Mobile Clean Scrollbar Utility */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
