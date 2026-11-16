@@ -16,7 +16,7 @@ export const STORAGE_KEYS = {
   PENALTIES: 'bgmi_tournament_penalties'
 };
 
-export const DEFAULT_VENUE = 'Campus Main Auditorium & Esports Arena';
+export const DEFAULT_VENUE = 'NIST University Campus, Palur Hills, Berhampur';
 
 // Default Credentials
 export const PASSWORDS = {

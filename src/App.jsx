@@ -11,6 +11,8 @@ import Leaderboard from './components/Leaderboard';
 import LoginModal from './components/LoginModal';
 import ModeratorManager from './components/ModeratorManager';
 import PenaltyManager from './components/PenaltyManager';
+import AboutEventOrganizer from './components/AboutEventOrganizer';
+import { ExternalLink, MapPin, Mail, Sparkles, Shield, Trophy } from 'lucide-react';
 
 import {
   loadStoredTeams,
@@ -279,6 +281,11 @@ export default function App() {
                 isSiteReady={isSiteReady}
               />
             </div>
+            {isSiteReady && (
+              <div className="px-1 sm:px-4 lg:px-6 animate-cyber-reveal">
+                <AboutEventOrganizer />
+              </div>
+            )}
           </div>
         )}
 
@@ -378,63 +385,158 @@ export default function App() {
         moderators={moderators}
       />
 
-      {/* Esports Footer */}
+      {/* Esports & Club Official Footer */}
       <footer className="border-t border-slate-900 bg-[#04060a] py-12 text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="font-display font-black text-2xl text-white">BGMI <span className="text-emerald-400">CLUB</span></span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
+          {/* Col 1: Event & Organizer Identity */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.jpg"
+                alt="Assult Survivors BGMI Logo"
+                className="w-12 h-12 rounded-xl object-cover border border-amber-500/40 shadow-lg shadow-amber-500/20"
+              />
+              <div>
+                <span className="font-display font-black text-xl text-white tracking-wide block">
+                  ASSULT <span className="text-amber-400">SURVIVORS</span>
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  DATA SCIENCE CLUB • <span className="text-amber-400">NIST UNIVERSITY</span>
+                </span>
+              </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Official campus and club Battlegrounds Mobile India esports platform powering competitive survival leagues, automated slot management, and real-time tie-breaker standings.
+              Official campus Battlegrounds Mobile India championship conducted by the <strong>Data Science Club (DSC)</strong> at NIST University, Berhampur, Odisha as part of <strong>SANKALP 2026</strong>.
             </p>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-display font-bold text-white text-sm uppercase">Quick Links</h4>
-            <ul className="space-y-1 text-xs text-slate-400">
-              <li><button onClick={() => setActiveTab('home')} className="hover:text-emerald-400">Home Landing</button></li>
-              <li><button onClick={() => setActiveTab('register')} className="hover:text-emerald-400">Squad Registration</button></li>
-              <li><button onClick={() => setActiveTab('teams')} className="hover:text-emerald-400">Registered Squads</button></li>
-              <li><button onClick={() => setActiveTab('leaderboard')} className="hover:text-emerald-400">Official Standings</button></li>
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <h4 className="font-display font-bold text-white text-sm uppercase">Tournament Rules</h4>
-            <ul className="space-y-1 text-xs text-slate-400">
-              <li>Kill = 2 Points</li>
-              <li>1st Place (WWCD) = 6 Points</li>
-              <li>2nd Place = 4 Points</li>
-              <li>3rd Place = 2 Points</li>
-              <li>4th & 5th Place = 1 Point</li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="font-display font-bold text-white text-sm uppercase">Stay Updated</h4>
-            <p className="text-xs text-slate-400">Subscribe for match room alerts & fixture schedules.</p>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter email address..."
-                className="w-full px-3 py-2 bg-[#0a0f18] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400"
-              />
-              <button className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs rounded-xl uppercase">
-                Join
-              </button>
+            <div className="text-[11px] text-amber-400/90 font-mono tracking-wider">
+              ✦ Learn. Build. Present. Compete.
             </div>
           </div>
+
+          {/* Col 2: Tournament Hub */}
+          <div className="space-y-2">
+            <h4 className="font-display font-bold text-white text-sm uppercase tracking-wider">Tournament Hub</h4>
+            <ul className="space-y-1.5 text-xs text-slate-400">
+              <li><button onClick={() => setActiveTab('home')} className="hover:text-amber-400 transition">Home Landing</button></li>
+              <li><button onClick={() => setActiveTab('register')} className="hover:text-amber-400 transition">Squad Registration</button></li>
+              <li><button onClick={() => setActiveTab('teams')} className="hover:text-amber-400 transition">Registered Squads & Stats</button></li>
+              <li><button onClick={() => setActiveTab('event')} className="hover:text-amber-400 transition">Event Day Verification</button></li>
+              <li><button onClick={() => setActiveTab('public-match')} className="hover:text-amber-400 transition">Match Room & Slots</button></li>
+              <li><button onClick={() => setActiveTab('leaderboard')} className="hover:text-amber-400 transition">Official Leaderboard</button></li>
+            </ul>
+          </div>
+
+          {/* Col 3: Data Science Club NIST Links */}
+          <div className="space-y-2">
+            <h4 className="font-display font-bold text-white text-sm uppercase tracking-wider">Data Science Club NIST</h4>
+            <ul className="space-y-1.5 text-xs text-slate-400">
+              <li>
+                <a
+                  href="https://data-science-club-nist.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition inline-flex items-center gap-1.5"
+                >
+                  <span>Official DSC NIST Portal</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://data-science-club-nist.vercel.app/sankalp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition inline-flex items-center gap-1.5"
+                >
+                  <span>Sankalp 2026 Tech Fest</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://data-science-club-nist.vercel.app/team"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition inline-flex items-center gap-1.5"
+                >
+                  <span>Our Student Team</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://data-science-club-nist.vercel.app/projects"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition inline-flex items-center gap-1.5"
+                >
+                  <span>Technical Projects</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://data-science-club-nist.vercel.app/achievements"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition inline-flex items-center gap-1.5"
+                >
+                  <span>Club Achievements</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://data-science-club-nist.vercel.app/contact"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-amber-400 transition inline-flex items-center gap-1.5"
+                >
+                  <span>Contact Organizer Desk</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Contact & Venue Details */}
+          <div className="space-y-3">
+            <h4 className="font-display font-bold text-white text-sm uppercase tracking-wider">Tournament Desk</h4>
+            <div className="space-y-2 text-xs text-slate-400">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <span>NIST University Campus, Palur Hills, Berhampur, Odisha 761008</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <a href="mailto:data.science.club@nist.edu" className="text-slate-300 hover:text-amber-400 font-mono">
+                  data.science.club@nist.edu
+                </a>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-slate-900 text-[11px] text-slate-500">
+              Strict scoring formula: Kill = 2 Pts • WWCD = 6 Pts • 2nd = 4 Pts • 3rd = 2 Pts • 4th/5th = 1 Pt.
+            </div>
+          </div>
+
         </div>
 
         <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-          <div>© 2026 BGMI Club Esports Platform. All rights reserved.</div>
-          <div className="flex items-center gap-4">
-            <span className="hover:text-slate-300">Privacy Policy</span>
+          <div>© 2026 Data Science Club, NIST University. All rights reserved. • Official Student Organization</div>
+          <div className="flex items-center gap-4 text-slate-400">
+            <span className="text-amber-400/80 font-semibold">Sankalp 2026 Tech Fest</span>
             <span>•</span>
-            <span className="hover:text-slate-300">Terms of Service</span>
+            <span>Assult Survivors BGMI</span>
             <span>•</span>
-            <span className="hover:text-slate-300">Fair Play Code</span>
+            <a
+              href="https://data-science-club-nist.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              DSC NIST
+            </a>
           </div>
         </div>
       </footer>

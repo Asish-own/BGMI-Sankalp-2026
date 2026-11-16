@@ -192,7 +192,7 @@ export default function EsportsLandingHero({
             {/* Live Tactical Pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-amber-500/60 text-amber-400 text-xs sm:text-sm font-black uppercase tracking-widest shadow-2xl shadow-black/80">
               <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse flex-shrink-0" />
-              <span className="tracking-widest">PRESENTED BY DATA SCIENCE CLUB</span>
+              <span className="tracking-widest">SANKALP 2026 • DATA SCIENCE CLUB, NIST UNIVERSITY</span>
             </div>
 
             {/* Glowing Hero Title */}
@@ -212,7 +212,7 @@ export default function EsportsLandingHero({
       {!videoReady ? (
         <div className="w-full bg-amber-500/10 py-2.5 sm:py-3 border-y border-amber-500/20 text-center animate-pulse flex items-center justify-center">
           <span className="font-mono text-xs sm:text-sm text-amber-400/70 tracking-widest uppercase">
-            ✦ LOADING TOURNAMENT BROADCAST FEED ✦ 25-SLOT CUSTOM ROOMS ✦ DATA SCIENCE CLUB ✦
+            ✦ ASSULT SURVIVORS BGMI TOURNAMENT ✦ DATA SCIENCE CLUB • NIST UNIVERSITY ✦ SANKALP 2026 ✦
           </span>
         </div>
       ) : (
@@ -220,8 +220,9 @@ export default function EsportsLandingHero({
           <div className="animate-marquee flex items-center whitespace-nowrap gap-8 sm:gap-12">
             {/* Track 1 */}
             <span className="flex items-center gap-8 sm:gap-12">
-              <span>✦ ASSULT SURVIVORS BGMI</span>
-              <span>✦ PRESENTED BY DATA SCIENCE CLUB</span>
+              <span>✦ ASSULT SURVIVORS BGMI TOURNAMENT</span>
+              <span>✦ DATA SCIENCE CLUB • NIST UNIVERSITY</span>
+              <span>✦ SANKALP 2026 FLAGSHIP EVENT</span>
               <span>✦ 25-SLOT CUSTOM ROOMS</span>
               <span>✦ KILL = 2 PTS</span>
               <span>✦ WINNER = 6 PTS</span>
@@ -229,8 +230,9 @@ export default function EsportsLandingHero({
             </span>
             {/* Track 2 */}
             <span className="flex items-center gap-8 sm:gap-12" aria-hidden="true">
-              <span>✦ ASSULT SURVIVORS BGMI</span>
-              <span>✦ PRESENTED BY DATA SCIENCE CLUB</span>
+              <span>✦ ASSULT SURVIVORS BGMI TOURNAMENT</span>
+              <span>✦ DATA SCIENCE CLUB • NIST UNIVERSITY</span>
+              <span>✦ SANKALP 2026 FLAGSHIP EVENT</span>
               <span>✦ 25-SLOT CUSTOM ROOMS</span>
               <span>✦ KILL = 2 PTS</span>
               <span>✦ WINNER = 6 PTS</span>
@@ -238,8 +240,9 @@ export default function EsportsLandingHero({
             </span>
             {/* Track 3 */}
             <span className="flex items-center gap-8 sm:gap-12" aria-hidden="true">
-              <span>✦ ASSULT SURVIVORS BGMI</span>
-              <span>✦ PRESENTED BY DATA SCIENCE CLUB</span>
+              <span>✦ ASSULT SURVIVORS BGMI TOURNAMENT</span>
+              <span>✦ DATA SCIENCE CLUB • NIST UNIVERSITY</span>
+              <span>✦ SANKALP 2026 FLAGSHIP EVENT</span>
               <span>✦ 25-SLOT CUSTOM ROOMS</span>
               <span>✦ KILL = 2 PTS</span>
               <span>✦ WINNER = 6 PTS</span>
@@ -266,13 +269,13 @@ export default function EsportsLandingHero({
           <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-amber-950/70 via-[#0d1624] to-slate-900 p-6 sm:p-10 border border-amber-500/40 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 hud-border">
             <div className="space-y-2 relative z-10 max-w-xl">
               <span className="text-[11px] sm:text-xs font-extrabold uppercase text-amber-400 tracking-wider">
-                ✦ Ready for Championship Glory?
+                ✦ SANKALP 2026 ESPORTS ARENA
               </span>
               <h2 className="font-display font-black text-2xl sm:text-4xl text-white tracking-wide">
                 BECOME THE NEXT <span className="text-amber-400 text-shadow-neon">ASSULT SURVIVOR!</span>
               </h2>
               <p className="text-slate-300 text-xs sm:text-sm">
-                Presented by Data Science Club. Register your 4-player squad today and get assigned to custom match room slots.
+                Conducted by Data Science Club, NIST University, Berhampur. Register your 4-player squad today and get assigned to custom match room slots.
               </p>
             </div>
 

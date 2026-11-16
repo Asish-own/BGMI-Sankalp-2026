@@ -12,7 +12,8 @@ import {
   Settings,
   Lock,
   LogOut,
-  Home
+  Home,
+  ExternalLink
 } from 'lucide-react';
 import { resetDemoData, DEFAULT_PERMISSIONS } from '../utils/storage';
 
@@ -66,7 +67,7 @@ export default function Navbar({
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 font-medium">
-                Presented by <strong className="text-amber-400">DATA SCIENCE CLUB</strong>
+                DATA SCIENCE CLUB • <strong className="text-amber-400">NIST UNIVERSITY</strong>
               </p>
             </div>
           </div>
@@ -111,7 +112,18 @@ export default function Navbar({
           </nav>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <a
+              href="https://data-science-club-nist.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-800 text-[11px] font-bold tracking-wider transition"
+              title="Official Data Science Club NIST Website"
+            >
+              <span>DSC NIST</span>
+              <ExternalLink className="w-3 h-3 text-amber-400" />
+            </a>
+
             <button
               onClick={() => setActiveTab('register')}
               className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-display font-black text-xs uppercase tracking-wider shadow-lg shadow-emerald-500/20 transition scale-105"
