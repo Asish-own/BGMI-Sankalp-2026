@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Menu,
   X,
+  Radio,
   ChevronRight,
   ChevronDown,
   Sparkles,
@@ -62,10 +63,10 @@ export default function Navbar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Close mobile menu on resize to desktop (>= 1024px)
+  // Close mobile drawer on resize to desktop (>= 1200px / xl breakpoint)
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) setIsMobileMenuOpen(false);
+      if (window.innerWidth >= 1200) setIsMobileMenuOpen(false);
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -82,7 +83,7 @@ export default function Navbar({
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Desktop Center Navigation Tabs (Clean & Focused)
+  // Desktop Center Navigation Tabs (Visible on screens >= 1200px / xl)
   const desktopNavTabs = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'teams', label: 'Squads & Stats', icon: Users, badge: teamsCount },
@@ -92,7 +93,7 @@ export default function Navbar({
     { id: 'about', label: 'About Us', icon: Info },
   ];
 
-  // Mobile drawer comprehensive navigation list
+  // Mobile / Tablet drawer comprehensive navigation list
   const mobileNavItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'register', label: 'Register Squad', icon: UserPlus, highlight: true },
@@ -116,29 +117,31 @@ export default function Navbar({
     setIsStaffDropdownOpen(false);
   };
 
+  const isMatchLive = activeMatch && activeMatch.status !== 'DRAFT';
+
   return (
     <>
       <header className="sticky top-0 z-40 bg-[#06080e]/95 backdrop-blur-xl border-b border-amber-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.6)] w-full select-none">
         <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-20 gap-2">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
             
-            {/* BRAND & LOGO (Left - Compact on Phone, Prevents Overflow) */}
+            {/* BRAND & LOGO (Adaptive for all device widths) */}
             <div 
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer group active:scale-95 transition min-w-0"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group active:scale-98 transition min-w-0 flex-shrink"
               onClick={() => handleNavSelect('home')}
             >
               <div className="relative flex-shrink-0">
                 <img
                   src="/logo.jpg"
                   alt="Assult Survivors BGMI Logo"
-                  className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl object-cover border border-amber-500/40 shadow-md shadow-amber-500/20 group-hover:border-amber-400 transition"
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl object-cover border border-amber-500/40 shadow-md shadow-amber-500/20 group-hover:border-amber-400 transition"
                 />
                 <div className="absolute -inset-0.5 bg-amber-500/20 rounded-lg sm:rounded-xl blur-sm -z-10 group-hover:bg-amber-500/40 transition"></div>
               </div>
               
               <div className="leading-tight min-w-0">
                 <div className="flex items-center gap-1.5 truncate">
-                  <span className="font-display font-black text-sm sm:text-lg tracking-wider text-white group-hover:text-amber-300 transition truncate">
+                  <span className="font-display font-black text-xs xs:text-sm sm:text-base md:text-lg tracking-wider text-white group-hover:text-amber-300 transition truncate">
                     ASSULT <span className="text-amber-400">SURVIVORS</span>
                   </span>
                   <span className="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded flex-shrink-0">
@@ -153,8 +156,8 @@ export default function Navbar({
               </div>
             </div>
 
-            {/* DESKTOP CENTER NAVIGATION TABS (Visible on PC >= 1024px) */}
-            <nav className="hidden lg:flex items-center gap-1.5 bg-[#0e1420]/80 p-1.5 rounded-2xl border border-slate-800/80 shadow-inner">
+            {/* DESKTOP CENTER NAVIGATION TABS (Visible only on screens >= 1200px / xl) */}
+            <nav className="hidden xl:flex items-center gap-1 bg-[#0e1420]/80 p-1.5 rounded-2xl border border-slate-800/80 shadow-inner flex-shrink-0">
               {desktopNavTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -190,8 +193,8 @@ export default function Navbar({
               })}
             </nav>
 
-            {/* DESKTOP RIGHT ACTION BAR (Visible on PC >= 1024px) */}
-            <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+            {/* DESKTOP RIGHT ACTION BAR (Visible on screens >= 1200px / xl) */}
+            <div className="hidden xl:flex items-center gap-3 flex-shrink-0">
               
               {/* DSC NIST Official External Link */}
               <a
@@ -278,8 +281,24 @@ export default function Navbar({
 
             </div>
 
-            {/* PHONE RIGHT: ONLY NAVBAR ICON (NO REGISTER CTA) */}
-            <div className="lg:hidden flex items-center flex-shrink-0">
+            {/* MOBILE & TABLET RIGHT BAR (Screens < 1200px) */}
+            <div className="xl:hidden flex items-center gap-2 flex-shrink-0">
+              
+              {/* Tablet Quick Action: Register Button (Visible on sm/md/lg tablets >= 640px, hidden on phones) */}
+              <button
+                type="button"
+                onClick={() => handleNavSelect('register')}
+                className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-display font-black uppercase tracking-wider transition shadow-md active:scale-95 ${
+                  activeTab === 'register'
+                    ? 'bg-white text-black shadow-amber-500/30'
+                    : 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-amber-500/20'
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Register Squad</span>
+              </button>
+
+              {/* Mobile & Tablet Navbar Hamburger Icon */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -288,7 +307,7 @@ export default function Navbar({
                 }}
                 aria-label={isMobileMenuOpen ? 'Minimize Navigation Menu' : 'Maximize Navigation Menu'}
                 aria-expanded={isMobileMenuOpen}
-                className={`p-2 rounded-xl border transition-all active:scale-90 flex items-center justify-center cursor-pointer select-none ${
+                className={`w-10 h-10 rounded-xl border transition-all active:scale-90 flex items-center justify-center cursor-pointer select-none ${
                   isMobileMenuOpen
                     ? 'bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/30'
                     : 'bg-[#111622] text-amber-400 border-amber-500/40 hover:bg-slate-800'
@@ -300,19 +319,20 @@ export default function Navbar({
                   <Menu className="w-5 h-5 stroke-[2.5]" />
                 )}
               </button>
+
             </div>
 
           </div>
         </div>
       </header>
 
-      {/* REACT PORTAL: MAXIMIZED MOBILE MENU DRAWER (Mounted to document.body) */}
+      {/* REACT PORTAL: MAXIMIZED MOBILE / TABLET DRAWER (Directly mounted to document.body) */}
       {typeof document !== 'undefined' && isMobileMenuOpen && createPortal(
         <div 
-          className="lg:hidden fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex flex-col justify-start"
-          style={{ top: '56px', height: 'calc(100dvh - 56px)' }}
+          className="xl:hidden fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex flex-col justify-start"
+          style={{ top: '64px', height: 'calc(100dvh - 64px)' }}
         >
-          <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-6 pb-24">
+          <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-6 pb-24 max-w-lg mx-auto w-full">
             
             {/* Header Status Bar */}
             <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-[11px] font-mono uppercase text-slate-400 tracking-wider">
@@ -384,7 +404,7 @@ export default function Navbar({
               })}
             </div>
 
-            {/* Staff Section (Mobile) */}
+            {/* Staff Section (Mobile/Tablet) */}
             {!isUser && (
               <div className="space-y-2 pt-2 border-t border-slate-800">
                 <div className="flex items-center justify-between px-2 text-[10px] font-black uppercase tracking-widest text-orange-400">
