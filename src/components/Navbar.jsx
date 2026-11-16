@@ -144,7 +144,7 @@ export default function Navbar({
         </div>
 
         {/* Mobile Navigation */}
-        <div className="lg:hidden flex items-center gap-1 overflow-x-auto pb-3 pt-1 no-scrollbar">
+        <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto pb-2.5 pt-1 px-1 no-scrollbar border-t border-slate-800/60">
           {navItems.filter(item => item.show).map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -152,14 +152,21 @@ export default function Navbar({
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition active:scale-95 ${
                   isActive
-                    ? 'bg-emerald-500 text-black font-bold'
-                    : 'bg-slate-900 text-slate-300 border border-slate-800'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-extrabold shadow-md shadow-amber-500/20'
+                    : 'bg-[#121824] text-slate-300 border border-slate-800 hover:text-white'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
+                {item.badge !== undefined && (
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                    isActive ? 'bg-black/30 text-black' : 'bg-slate-800 text-amber-400'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}

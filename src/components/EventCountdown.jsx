@@ -85,64 +85,64 @@ export default function EventCountdown({
   });
 
   return (
-    <div className="relative overflow-hidden glass-panel p-6 sm:p-10 rounded-3xl border border-amber-500/40 shadow-2xl hud-border">
+    <div className="relative overflow-hidden glass-panel p-4 sm:p-10 rounded-2xl sm:rounded-3xl border border-amber-500/40 shadow-2xl hud-border w-full">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="relative z-10 text-center space-y-6">
+      <div className="relative z-10 text-center space-y-5 sm:space-y-6">
         
         {/* Header Badge & Admin Edit Button */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-widest">
-            <Flame className="w-4 h-4 animate-bounce text-orange-400" /> TOURNAMENT MATCH DAY COUNTDOWN
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[11px] sm:text-xs font-bold uppercase tracking-widest">
+            <Flame className="w-4 h-4 animate-bounce text-orange-400 flex-shrink-0" /> TOURNAMENT MATCH DAY COUNTDOWN
           </div>
 
           {isAdmin && (
             <button
               onClick={handleOpenEdit}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-xs font-extrabold uppercase tracking-wider transition shadow-md ml-auto"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[11px] sm:text-xs font-extrabold uppercase tracking-wider transition shadow-md w-full sm:w-auto justify-center"
             >
-              <Settings2 className="w-3.5 h-3.5" /> Admin: Change Date, Time & Venue
+              <Settings2 className="w-3.5 h-3.5 flex-shrink-0" /> Admin: Change Date, Time & Venue
             </button>
           )}
         </div>
 
-        <h2 className="font-display font-black text-3xl sm:text-5xl text-white tracking-wider">
+        <h2 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-white tracking-wider">
           THE BATTLE BEGINS IN
         </h2>
 
         {/* Countdown Timer Display */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto pt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 max-w-3xl mx-auto pt-1">
           {/* Days */}
-          <div className="bg-[#0b0e14]/90 p-5 rounded-3xl border border-slate-800 shadow-inner group hover:border-amber-500/40 transition">
-            <div className="font-display font-black text-4xl sm:text-6xl text-amber-400 group-hover:scale-105 transition">
+          <div className="bg-[#0b0e14]/90 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-800 shadow-inner group hover:border-amber-500/40 transition">
+            <div className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-amber-400 group-hover:scale-105 transition">
               {String(timeLeft.days).padStart(2, '0')}
             </div>
-            <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">DAYS</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mt-1 sm:mt-2">DAYS</div>
           </div>
 
           {/* Hours */}
-          <div className="bg-[#0b0e14]/90 p-5 rounded-3xl border border-slate-800 shadow-inner group hover:border-amber-500/40 transition">
-            <div className="font-display font-black text-4xl sm:text-6xl text-amber-400 group-hover:scale-105 transition">
+          <div className="bg-[#0b0e14]/90 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-800 shadow-inner group hover:border-amber-500/40 transition">
+            <div className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-amber-400 group-hover:scale-105 transition">
               {String(timeLeft.hours).padStart(2, '0')}
             </div>
-            <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">HOURS</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mt-1 sm:mt-2">HOURS</div>
           </div>
 
           {/* Minutes */}
-          <div className="bg-[#0b0e14]/90 p-5 rounded-3xl border border-slate-800 shadow-inner group hover:border-amber-500/40 transition">
-            <div className="font-display font-black text-4xl sm:text-6xl text-amber-400 group-hover:scale-105 transition">
+          <div className="bg-[#0b0e14]/90 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-800 shadow-inner group hover:border-amber-500/40 transition">
+            <div className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-amber-400 group-hover:scale-105 transition">
               {String(timeLeft.minutes).padStart(2, '0')}
             </div>
-            <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">MINUTES</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mt-1 sm:mt-2">MINUTES</div>
           </div>
 
           {/* Seconds */}
-          <div className="bg-[#0b0e14]/90 p-5 rounded-3xl border border-slate-800 shadow-inner group hover:border-orange-500/40 transition">
-            <div className="font-display font-black text-4xl sm:text-6xl text-orange-500 group-hover:scale-105 transition">
+          <div className="bg-[#0b0e14]/90 p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-800 shadow-inner group hover:border-orange-500/40 transition">
+            <div className="font-display font-black text-3xl sm:text-5xl lg:text-6xl text-orange-500 group-hover:scale-105 transition">
               {String(timeLeft.seconds).padStart(2, '0')}
             </div>
-            <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mt-2">SECONDS</div>
+            <div className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mt-1 sm:mt-2">SECONDS</div>
           </div>
         </div>
 

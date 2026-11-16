@@ -258,16 +258,16 @@ export default function App() {
       />
 
       {/* Main Content Body */}
-      <main className="flex-grow px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-grow px-2 sm:px-6 lg:px-8 py-3 sm:py-6 w-full">
         {activeTab === 'home' && (
-          <div className="space-y-12 max-w-7xl mx-auto">
+          <div className="space-y-8 sm:space-y-12 max-w-7xl mx-auto w-full">
             <EsportsLandingHero
               onRegisterClick={() => setActiveTab('register')}
               onViewStandingsClick={() => setActiveTab('leaderboard')}
               activeMatch={activeMatch}
               teamsCount={teams.length}
             />
-            <div className="px-4 sm:px-6 lg:px-8">
+            <div className="px-1 sm:px-4 lg:px-6">
               <EventCountdown
                 eventDateIso={eventDateIso}
                 eventVenue={eventVenue}
