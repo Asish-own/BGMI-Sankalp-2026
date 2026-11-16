@@ -85,24 +85,24 @@ export default function Navbar({
 
   // Desktop Center Navigation Tabs (Visible on screens >= 1200px / xl)
   const desktopNavTabs = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'teams', label: 'Squads & Stats', icon: Users, badge: teamsCount },
-    { id: 'public-match', label: 'Match Room', icon: Gamepad2, pulse: activeMatch && activeMatch.status !== 'DRAFT' },
-    { id: 'leaderboard', label: 'Standings', icon: Trophy },
-    { id: 'event', label: 'Event Day', icon: Calendar },
-    { id: 'about', label: 'About Us', icon: Info },
-  ];
+    { id: 'home', label: 'Home', icon: Home, show: true },
+    { id: 'teams', label: 'Squads & Stats', icon: Users, badge: teamsCount, show: true },
+    { id: 'public-match', label: 'Match Room', icon: Gamepad2, pulse: activeMatch && activeMatch.status !== 'DRAFT', show: true },
+    { id: 'leaderboard', label: 'Standings', icon: Trophy, show: true },
+    { id: 'event', label: 'Event Day', icon: Calendar, show: true },
+    { id: 'about', label: 'About Us', icon: Info, show: !isAdmin },
+  ].filter(t => t.show);
 
   // Mobile / Tablet drawer comprehensive navigation list
   const mobileNavItems = [
-    { id: 'home', label: 'Home', icon: Home },
-    { id: 'register', label: 'Register Squad', icon: UserPlus, highlight: true },
-    { id: 'teams', label: 'Squads & Stats', icon: Users, badge: teamsCount },
-    { id: 'public-match', label: 'Match Room', icon: Gamepad2, pulse: activeMatch && activeMatch.status !== 'DRAFT' },
-    { id: 'leaderboard', label: 'Official Leaderboard', icon: Trophy },
-    { id: 'event', label: 'Event Day Attendance', icon: Calendar },
-    { id: 'about', label: 'About Us (Organizer & Fest)', icon: Info },
-  ];
+    { id: 'home', label: 'Home', icon: Home, show: true },
+    { id: 'register', label: 'Register Squad', icon: UserPlus, highlight: true, show: true },
+    { id: 'teams', label: 'Squads & Stats', icon: Users, badge: teamsCount, show: true },
+    { id: 'public-match', label: 'Match Room', icon: Gamepad2, pulse: activeMatch && activeMatch.status !== 'DRAFT', show: true },
+    { id: 'leaderboard', label: 'Official Leaderboard', icon: Trophy, show: true },
+    { id: 'event', label: 'Event Day Attendance', icon: Calendar, show: true },
+    { id: 'about', label: 'About Us (Organizer & Fest)', icon: Info, show: !isAdmin },
+  ].filter(t => t.show);
 
   // Staff Hub Items
   const staffTabs = [
@@ -196,17 +196,19 @@ export default function Navbar({
             {/* DESKTOP RIGHT ACTION BAR (Visible on screens >= 1200px / xl) */}
             <div className="hidden xl:flex items-center gap-3 flex-shrink-0">
               
-              {/* DSC NIST Official External Link */}
-              <a
-                href="https://data-science-club-nist.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-800 text-[11px] font-bold tracking-wider transition"
-                title="Official Data Science Club NIST Website"
-              >
-                <span>DSC NIST</span>
-                <ExternalLink className="w-3 h-3 text-amber-400/80" />
-              </a>
+              {/* DSC NIST Official External Link (Hidden for Admin) */}
+              {!isAdmin && (
+                <a
+                  href="https://data-science-club-nist.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-amber-400 border border-slate-800 text-[11px] font-bold tracking-wider transition"
+                  title="Official Data Science Club NIST Website"
+                >
+                  <span>DSC NIST</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400/80" />
+                </a>
+              )}
 
               {/* Staff Dropdown Menu (Only shown when Admin/Moderator is authenticated) */}
               {!isUser && (
@@ -446,54 +448,56 @@ export default function Navbar({
               </div>
             )}
 
-            {/* Data Science Club NIST Links */}
-            <div className="space-y-2 pt-3 border-t border-slate-800">
-              <div className="text-[10px] font-black uppercase text-amber-400 tracking-widest px-2 mb-1 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3" /> Data Science Club • NIST University
+            {/* Data Science Club NIST Links (Hidden for Admin) */}
+            {!isAdmin && (
+              <div className="space-y-2 pt-3 border-t border-slate-800">
+                <div className="text-[10px] font-black uppercase text-amber-400 tracking-widest px-2 mb-1 flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3" /> Data Science Club • NIST University
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <a
+                    href="https://data-science-club-nist.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
+                  >
+                    <span>DSC Portal</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  </a>
+
+                  <a
+                    href="https://data-science-club-nist.vercel.app/sankalp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
+                  >
+                    <span>Sankalp 2026</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  </a>
+
+                  <a
+                    href="https://data-science-club-nist.vercel.app/team"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
+                  >
+                    <span>Our Team</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  </a>
+
+                  <a
+                    href="https://data-science-club-nist.vercel.app/contact"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
+                  >
+                    <span>Contact Desk</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  </a>
+                </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <a
-                  href="https://data-science-club-nist.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
-                >
-                  <span>DSC Portal</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
-                </a>
-
-                <a
-                  href="https://data-science-club-nist.vercel.app/sankalp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
-                >
-                  <span>Sankalp 2026</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
-                </a>
-
-                <a
-                  href="https://data-science-club-nist.vercel.app/team"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
-                >
-                  <span>Our Team</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
-                </a>
-
-                <a
-                  href="https://data-science-club-nist.vercel.app/contact"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between p-3 rounded-xl bg-[#0e1420] border border-slate-800 text-slate-300 hover:text-amber-400 font-semibold transition"
-                >
-                  <span>Contact Desk</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
-                </a>
-              </div>
-            </div>
+            )}
 
             {/* Quick Dismiss Button */}
             <button
