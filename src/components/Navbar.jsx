@@ -15,7 +15,6 @@ import {
   ExternalLink,
   Menu,
   X,
-  Radio,
   ChevronRight,
   ChevronDown,
   Sparkles,
@@ -117,38 +116,36 @@ export default function Navbar({
     setIsStaffDropdownOpen(false);
   };
 
-  const isMatchLive = activeMatch && activeMatch.status !== 'DRAFT';
-
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#06080e]/95 backdrop-blur-xl border-b border-amber-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.6)] select-none">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
+      <header className="sticky top-0 z-40 bg-[#06080e]/95 backdrop-blur-xl border-b border-amber-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.6)] w-full select-none">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-20 gap-2">
             
-            {/* BRAND & LOGO (Left) */}
+            {/* BRAND & LOGO (Left - Compact on Phone, Prevents Overflow) */}
             <div 
-              className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group active:scale-95 transition flex-shrink-0"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group active:scale-95 transition min-w-0"
               onClick={() => handleNavSelect('home')}
             >
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <img
                   src="/logo.jpg"
                   alt="Assult Survivors BGMI Logo"
-                  className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-cover border border-amber-500/40 shadow-lg shadow-amber-500/20 group-hover:border-amber-400 transition"
+                  className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl object-cover border border-amber-500/40 shadow-md shadow-amber-500/20 group-hover:border-amber-400 transition"
                 />
-                <div className="absolute -inset-0.5 bg-amber-500/20 rounded-xl blur-sm -z-10 group-hover:bg-amber-500/40 transition"></div>
+                <div className="absolute -inset-0.5 bg-amber-500/20 rounded-lg sm:rounded-xl blur-sm -z-10 group-hover:bg-amber-500/40 transition"></div>
               </div>
               
-              <div className="leading-tight">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <span className="font-display font-black text-sm sm:text-lg tracking-wider text-white group-hover:text-amber-300 transition">
+              <div className="leading-tight min-w-0">
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="font-display font-black text-sm sm:text-lg tracking-wider text-white group-hover:text-amber-300 transition truncate">
                     ASSULT <span className="text-amber-400">SURVIVORS</span>
                   </span>
-                  <span className="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-md">
+                  <span className="px-1.5 py-0.5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded flex-shrink-0">
                     BGMI
                   </span>
                 </div>
-                <p className="text-[9px] sm:text-[11px] text-slate-400 font-semibold tracking-wide flex items-center gap-1">
+                <p className="text-[9px] sm:text-[11px] text-slate-400 font-semibold tracking-wide truncate flex items-center gap-1">
                   <span>DSC</span>
                   <span className="text-slate-600">•</span>
                   <span className="text-amber-400/90 font-bold">NIST UNIVERSITY</span>
@@ -281,40 +278,8 @@ export default function Navbar({
 
             </div>
 
-            {/* MOBILE PRIORITY ACTIONS & HAMBURGER TOGGLE (Screen < 1024px) */}
-            <div className="lg:hidden flex items-center gap-2">
-              
-              {/* Contextual Live Room Alert */}
-              {isMatchLive && (
-                <button
-                  type="button"
-                  onClick={() => handleNavSelect('public-match')}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition active:scale-95 border ${
-                    activeTab === 'public-match'
-                      ? 'bg-emerald-500 text-black border-emerald-400'
-                      : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                  }`}
-                >
-                  <Radio className="w-3 h-3 animate-pulse text-emerald-400 flex-shrink-0" />
-                  <span>Live</span>
-                </button>
-              )}
-
-              {/* Quick Register CTA */}
-              <button
-                type="button"
-                onClick={() => handleNavSelect('register')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-display font-black uppercase tracking-wider transition shadow-md active:scale-95 ${
-                  activeTab === 'register'
-                    ? 'bg-white text-black shadow-amber-500/30'
-                    : 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-amber-500/20'
-                }`}
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>Register</span>
-              </button>
-
-              {/* Mobile Navbar Icon (Guaranteed responsive touch target) */}
+            {/* PHONE RIGHT: ONLY NAVBAR ICON (NO REGISTER CTA) */}
+            <div className="lg:hidden flex items-center flex-shrink-0">
               <button
                 type="button"
                 onClick={(e) => {
@@ -323,7 +288,7 @@ export default function Navbar({
                 }}
                 aria-label={isMobileMenuOpen ? 'Minimize Navigation Menu' : 'Maximize Navigation Menu'}
                 aria-expanded={isMobileMenuOpen}
-                className={`p-2.5 rounded-xl border transition-all active:scale-90 flex items-center justify-center cursor-pointer select-none ${
+                className={`p-2 rounded-xl border transition-all active:scale-90 flex items-center justify-center cursor-pointer select-none ${
                   isMobileMenuOpen
                     ? 'bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/30'
                     : 'bg-[#111622] text-amber-400 border-amber-500/40 hover:bg-slate-800'
@@ -335,18 +300,17 @@ export default function Navbar({
                   <Menu className="w-5 h-5 stroke-[2.5]" />
                 )}
               </button>
-
             </div>
 
           </div>
         </div>
       </header>
 
-      {/* REACT PORTAL: MAXIMIZED MOBILE MENU DRAWER (Directly mounted to document.body) */}
+      {/* REACT PORTAL: MAXIMIZED MOBILE MENU DRAWER (Mounted to document.body) */}
       {typeof document !== 'undefined' && isMobileMenuOpen && createPortal(
         <div 
           className="lg:hidden fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex flex-col justify-start"
-          style={{ top: '64px', height: 'calc(100dvh - 64px)' }}
+          style={{ top: '56px', height: 'calc(100dvh - 56px)' }}
         >
           <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-6 pb-24">
             
@@ -380,13 +344,21 @@ export default function Navbar({
                     type="button"
                     onClick={() => handleNavSelect(item.id)}
                     className={`w-full flex items-center justify-between p-3.5 rounded-2xl text-sm font-bold transition-all active:scale-[0.98] ${
-                      isActive
+                      item.highlight && !isActive
+                        ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/40 shadow-md shadow-amber-500/10'
+                        : isActive
                         ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black font-extrabold shadow-lg shadow-amber-500/25 border border-amber-400'
                         : 'bg-[#101624] text-slate-200 border border-slate-800/90 hover:bg-slate-800 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${isActive ? 'bg-black/20 text-black' : 'bg-slate-800 text-amber-400'}`}>
+                      <div className={`p-2 rounded-xl ${
+                        isActive 
+                          ? 'bg-black/20 text-black' 
+                          : item.highlight 
+                          ? 'bg-amber-500/20 text-amber-400'
+                          : 'bg-slate-800 text-amber-400'
+                      }`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       <span className="tracking-wide">{item.label}</span>
