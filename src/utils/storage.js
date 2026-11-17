@@ -3,6 +3,7 @@
  */
 
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { SAMPLE_TEAMS, SAMPLE_ATTENDANCE } from './sampleTeams';
 
 export const STORAGE_KEYS = {
   TEAMS: 'bgmi_tournament_teams',
@@ -52,10 +53,10 @@ export const DEFAULT_MODERATORS = [
   }
 ];
 
-// Default Empty Teams for tournament
-export const DEFAULT_DEMO_TEAMS = [];
+// 30 Sample Teams for Assault Survivors BGMI Tournament - Sankalp 2026
+export const DEFAULT_DEMO_TEAMS = SAMPLE_TEAMS;
 
-export const DEFAULT_ATTENDANCE = {};
+export const DEFAULT_ATTENDANCE = SAMPLE_ATTENDANCE;
 
 export const getDefaultEventDate = () => {
   const d = new Date();
@@ -182,12 +183,12 @@ export async function fetchTeamsCloud() {
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase.from('teams').select('*').order('registered_at', { ascending: true });
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         const formatted = data.map(t => ({
           id: t.id,
           teamName: t.team_name,
           leaderName: t.leader_name,
-          leaderStream: t.leader_stream || '',
+          leaderStream: t.leader_stream || (t.members && t.members[0] && t.members[0].stream) || '',
           leaderYear: t.leader_year,
           leaderPhone: t.leader_phone,
           leaderBgmiId: t.leader_bgmi_id,
@@ -214,19 +215,38 @@ export async function saveTeams(teams) {
 
   if (isSupabaseConfigured) {
     try {
-      const dbPayload = teams.map(t => ({
-        id: t.id,
-        team_name: t.teamName,
-        leader_name: t.leaderName,
-        leader_stream: t.leaderStream || null,
-        leader_year: t.leaderYear,
-        leader_phone: t.leaderPhone,
-        leader_bgmi_id: t.leaderBgmiId,
-        leader_ign: t.leaderIgn || t.leaderBgmiId,
-        members: t.members || [],
-        registered_at: t.registeredAt || new Date().toISOString()
-      }));
-      await supabase.from('teams').upsert(dbPayload);
+      const dbPayload = teams.map(t => {
+        const row = {
+          id: t.id,
+          team_name: t.teamName,
+          leader_name: t.leaderName,
+          leader_year: t.leaderYear,
+          leader_phone: t.leaderPhone,
+          leader_bgmi_id: t.leaderBgmiId,
+          leader_ign: t.leaderIgn || t.leaderBgmiId,
+          members: (t.members || []).map(m => ({
+            ...m,
+            stream: m.stream || t.leaderStream || ''
+          })),
+          registered_at: t.registeredAt || new Date().toISOString()
+        };
+        if (t.leaderStream) {
+          row.leader_stream = t.leaderStream;
+        }
+        return row;
+      });
+
+      const { error } = await supabase.from('teams').upsert(dbPayload);
+      if (error) {
+        // If leader_stream column doesn't exist on remote table, upsert without it
+        if (error.message && error.message.includes('leader_stream')) {
+          const safePayload = dbPayload.map(({ leader_stream, ...rest }) => rest);
+          const { error: retryError } = await supabase.from('teams').upsert(safePayload);
+          if (retryError) console.warn('Supabase saveTeams retry error:', retryError);
+        } else {
+          console.warn('Supabase saveTeams error:', error);
+        }
+      }
     } catch (e) {
       console.warn('Supabase save error:', e);
     }
@@ -240,7 +260,7 @@ export async function fetchAttendanceCloud() {
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase.from('attendance').select('*');
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         const attObj = {};
         data.forEach(item => {
           attObj[item.team_id] = item.is_present;
@@ -463,19 +483,35 @@ export async function saveStoredModerators(moderators) {
 export function loadStoredTeams() {
   const data = localStorage.getItem(STORAGE_KEYS.TEAMS);
   if (!data) {
-    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify([]));
-    return [];
+    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(DEFAULT_DEMO_TEAMS));
+    return DEFAULT_DEMO_TEAMS;
   }
-  try { return JSON.parse(data); } catch (e) { return []; }
+  try {
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return DEFAULT_DEMO_TEAMS;
+    }
+    return parsed;
+  } catch (e) {
+    return DEFAULT_DEMO_TEAMS;
+  }
 }
 
 export function loadStoredAttendance() {
   const data = localStorage.getItem(STORAGE_KEYS.ATTENDANCE);
   if (!data) {
-    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify({}));
-    return {};
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(DEFAULT_ATTENDANCE));
+    return DEFAULT_ATTENDANCE;
   }
-  try { return JSON.parse(data); } catch (e) { return {}; }
+  try {
+    const parsed = JSON.parse(data);
+    if (!parsed || Object.keys(parsed).length === 0) {
+      return DEFAULT_ATTENDANCE;
+    }
+    return parsed;
+  } catch (e) {
+    return DEFAULT_ATTENDANCE;
+  }
 }
 
 export function loadStoredMatches() {
